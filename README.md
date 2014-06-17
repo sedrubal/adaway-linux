@@ -1,11 +1,7 @@
 adaway-linux
 ============
 
-a small script to add domains hosting ads to the hosts file to block them in your whole system.
-
-Operation
----------
-All domains will be listet in /etc/hosts and so each request to them will be redirected to a other IP (127.0.0.1, 0.0.0.0, ...)
+A small script to block ad-containing sites in your whole Linux system.
 
 Features
 --------
@@ -14,30 +10,29 @@ Features
 + cronjob support
 + gefrickelt ;)
 
-Efficiency
-----------
-+ Theoretical it should work fine, but it's difficult to get all domains, hosting ads.
-+ /etc/hosts file may be verry confusing.
-+ If you want to change something, you have to do this in the backuped file.
-+ Maybe PlugIns like AdBlock will work better...
-
 Usage
 -----
 - 0) choose a directory and put the two scripts in it
-- 1) Please familiarize yourself with the script to prevent your System for damage. (Obacht Frickeley)
-- 2) First run ./install.sh
-  - This will create the hostssources.lst, where you can add your own domains, offering parts of a hosts file
-  - It will also backup the /etc/hosts into your homedirectory
-  - If you want, you can add a cronjob
+- 1) please familiarize yourself with the script to prevent your system from damage (Obacht Frickelei)
+- 2) run ./install.sh
+  - this will create ./hostssources.lst, where you can add your own domains offering lists with adservers
+  - it will also backup /etc/hosts to ~/.hosts.original 
+  - if you want, you can add a cronjob
 
-- 3) now you can run 
-  - ./adaway-linux.sh --help
-   to watch the help and then
-  - ./adaway-linux.sh --simulate
-   to check if you understood, what this script will do.
+- 3) run ./adaway-linux.sh --help and find out which options are available
+- 4) run ./adaway-linux.sh --simulate to check whether you understood what this script will do
+- 4) if you're sure you want to proceed, run ./adaway-linux.sh
 
-- 4) If you now know, what you do run
-  - ./adaway-linux.sh
-      
+Operation
+---------
+All domains will be listed in /etc/hosts and therefore any request to them will be redirected to localhost or a dummy IP (127.0.0.1, 0.0.0.0, ...)
+
+Efficiency
+----------
++ theoretical it should work fine, but it's difficult to get all domains witch host advertisements
++ /etc/hosts file may be very confusing
++ if you want to add or remove something manually from /etc/hosts, you have to do this in the backupfile
++ maybe plugins like AdBlock will work better...
+
 Please report bugs or fork this repo and help to improve this script.
 Thank you ;)
