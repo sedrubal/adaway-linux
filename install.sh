@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #settings
-hostsorig='/etc/.hosts.original'
+hostsorig="/etc/.hosts.original"
 srclst="hostssources.lst"
 #
 
@@ -13,14 +13,14 @@ ARG1="$1"
 if [ "$ARG1" == "-u" ] || [ "$ARG" == "--uninstall" ] ; then
   read -p "[?] Do you really want to uninstall adaway-linux and restore the original hosts-file? [Y/n] " REPLY
   case "$REPLY" in
-  'YES' | 'Yes' | 'yes' | 'Y' | 'y' | '' )
+  "YES" | "Yes" | "yes" | "Y" | "y" | "" )
     echo "[i] Restoring /etc/hosts"
     sudo mv "$hostsorig" /etc/hosts
     echo "[!] If you added a cronjob, please remove it by yourself."
     echo "[i] finished"
     exit 1
     ;;
-  'NO' | 'No' | 'no' | 'N' | 'n' )
+  "NO" | "No" | "no" | "N" | "n" )
     echo "[i] cancelled"
     exit 0
     ;;
@@ -33,7 +33,7 @@ echo "Welcome to the install-script for adaway-linux."
 echo "[!] Please run this only ONCE! Cancel, if you already modified /etc/hosts by adaway-linux.sh."
 read -p "[?] Proceed? [Y/n] " REPLY
 case "$REPLY" in
-'YES' | 'Yes' | 'yes' | 'Y' | 'y' | '' )
+"YES" | "Yes" | "yes" | "Y" | "y" | "" )
   #check if script wasn't started with the -f option
   if [ "$ARG1" != "-f" ] && [ "$ARG1" != "--force" ] ; then
     #backup hosts-file
@@ -58,12 +58,12 @@ case "$REPLY" in
   #add cronjob
   read -p "[?] Create a cronjob which updates /etc/hosts with new adservers every 5 days? [Y/n] " REPLY
   case "$REPLY" in
-  'YES' | 'Yes' | 'yes' | 'Y' | 'y' | '' )
+  "YES" | "Yes" | "yes" | "Y" | "y" | "" )
     echo "[i] Creating cronjob..."
     line="1 12 */5 * * ""$PWD""adaway-linux.sh"
     (sudo crontab -u root -l; echo "$line" ) | sudo crontab -u root -
     ;;
-  'NO' | 'No' | 'no' | 'N' | 'n' )
+  "NO" | "No" | "no" | "N" | "n" )
     echo "[i] No cronjob created."
     ;;
   esac
@@ -71,7 +71,7 @@ case "$REPLY" in
   echo "[i] finished. For uninstall, please run ./install.sh -u"
   exit 1
   ;;
-'NO' | 'No' | 'no' | 'N' | 'n' )
+"NO" | "No" | "no" | "N" | "n" )
   echo "[i] cancelled"
   exit 0
   ;;
