@@ -5,6 +5,7 @@
 #settings
 hostsorig="/etc/.hosts.original"
 srclst="hostssources.lst"
+version="1.0"
 #
 
 case "$1" in
@@ -27,14 +28,14 @@ case "$1" in
     exit 1
     ;;
     #
-  "" )
+  "-i" | "--install" )
     echo "Welcome to the install-script for adaway-linux."
     echo "[!] Please run this only ONCE! Cancel, if you already modified /etc/hosts by adaway-linux.sh."
     read -p "[?] Proceed? [Y/n] " REPLY
     case "$REPLY" in
       "YES" | "Yes" | "yes" | "Y" | "y" | "" )
 	#check if script wasn't started with the -f option
-	if [ "$1" != "-f" ] && [ "$ARG1" != "--force" ] ; then
+	if [ "$2" != "-f" ] && [ "$ARG1" != "--force" ] ; then
 	  #backup hosts-file
 	  echo "[i] First I will backup the original hosts-file to $hostsorig."
 	  sudo cp /etc/hosts "$hostsorig"
@@ -76,15 +77,25 @@ case "$1" in
     esac
     exit 0
     ;;
-  "--help" | * )
+  "-v" | "--version" )
+    echo "Version: $version"
+    exit 0
+    ;;
+  "-h" | "--help" )
     #show help
-    echo "Aufruf: ./install.sh [OPTION]"
+    echo "Usage: ./install.sh [OPTION]"
     echo ""
-    echo "  -?,  --help		show this help"
+    echo "  -i,  --install	install all things needed by adaway-linux"
+    echo "  			-f,  --force	force the installation"
     echo "  -u,  --uninstall	remove all changes made by this script"
+    echo "  -v,  --version	show current version of this script"
+    echo "  -?,  --help		show this help"
     echo ""
     echo "Please report bugs at https://github.com/sedrubal/adaway-linux/issues"
     #
     exit 1
     ;;
+  * )
+    echo "install.sh: unknown option $1"
+    echo -e "Run »./install.sh -h« or »./install.sh --help« to get further \ninformation."
 esac
