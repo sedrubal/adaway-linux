@@ -5,21 +5,22 @@ A small script to block ad-containing sites in your whole Linux system.
 
 Features
 --------
-+ install-script (also supports uninstall)
-+ update hosts from hosts-servers (like http://adaway.org/hosts.txt)
-+ cronjob support
+* install-script (also supports uninstall)
+* update hosts from hosts-servers (like http://adaway.org/hosts.txt)
+* cronjob support
 
 Usage
 -----
-- 0) choose a directory and put the two scripts in it
-- 1) please familiarize yourself with the script to prevent your system from damage (Obacht Frickelei)
-- 2) run `./install.sh`
-  - this will create ./hostssources.lst, where you can add your own domains offering lists with adservers
-  - it will also backup /etc/hosts to ~/.hosts.original 
-  - if you want, you can add a cronjob
+0. choose a directory and put the two scripts in it
+1. please familiarize yourself with the script to prevent your system from damage (Obacht Frickelei)
+2. run `./install.sh`
+  * this will create ./hostssources.lst, where you can add your own domains offering lists with adservers
+  * it will also backup /etc/hosts to ~/.hosts.original 
+  * if you want, you can add a cronjob
 
-- 3) run `./adaway-linux.sh --help` and find out which options are available - 4) run `./adaway-linux.sh --simulate` to check whether you 
-understood what this script will do - 4) if you're sure you want to proceed, run `./adaway-linux.sh`
+3. run `./adaway-linux.sh --help` and find out which options are available
+4. run `./adaway-linux.sh --simulate` to check whether you understood what this script will do
+4. if you're sure you want to proceed, run `./adaway-linux.sh`
 
 Operation
 ---------
