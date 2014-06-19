@@ -1,4 +1,6 @@
 #!/bin/bash
+# CC BY-SA 4.0
+# https://github.com/sedrubal/adaway-linux
 
 #settings
 hostsorig="/etc/.hosts.original"
