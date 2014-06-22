@@ -8,7 +8,6 @@ Features
 + install-script (also supports uninstall)
 + update hosts from hosts-servers (like http://adaway.org/hosts.txt)
 + cronjob support
-+ gefrickelt ;)
 
 Usage
 -----
@@ -33,6 +32,11 @@ Efficiency
 + /etc/hosts file may be very confusing
 + if you want to add or remove something manually from /etc/hosts, you have to do this in the backupfile
 + maybe plugins like AdBlock will work better...
+
+Other
+-----
+Version: v1.0 #
+Licence: CC BY-SA 4.0
 
 Please report bugs or fork this repo and help to improve this script.
 Thank you ;)
