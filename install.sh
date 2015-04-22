@@ -48,7 +48,7 @@ echo "[?] If you want, I create a cronjob ever 5 days. [y]"
 read REPLY
 if [ "$REPLY" == "y" ] ; then
   echo "[i] Ok, I'll write in root's cron tab."
-  line="1 12 */5 * * ""$PWD""adaway-linux.sh"
+  line="1 12 */5 * * $PWD/adaway-linux.sh"
   (sudo crontab -u root -l; echo "$line" ) | sudo crontab -u root -
 fi
 
