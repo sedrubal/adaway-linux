@@ -42,7 +42,7 @@ Efficiency
 
 Other
 -----
-- Version: v1.0
+- Version: v2.0
 - Licence: CC BY-SA 4.0
 
 Please report bugs or fork this repo and help to improve this script.
