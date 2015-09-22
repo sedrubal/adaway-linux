@@ -1,10 +1,17 @@
 #!/bin/bash
-# CC BY-SA 4.0
-# https://github.com/sedrubal/adaway-linux
+###########################################################
+# adaway-linux						  #
+# Remove ads system-wide in Linux			  #
+###########################################################
+# authors:	sedrubal, diy-electronics		  #
+# version:	v1.0					  #
+# licence:	CC BY-SA 4.0				  #
+# github:	https://github.com/sedrubal/adaway-linux  #
+###########################################################
 
 #settings
+hostsorig="/etc/.hosts.original"
 tmpdir="/tmp/adaway-linux/"
-hostsorig="$HOME""/.hosts.original"
 #
 
 #show help
