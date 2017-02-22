@@ -15,15 +15,15 @@ Usage
 ```
 Usage: ./install.sh [OPTION]
 
-  -i,  --install        install all things needed by adaway-linux
-                        -f,  --force    force the installation
-  -u,  --uninstall      remove all changes made by this script
-  -v,  --version        show current version of this script
-  -?,  --help           show this help
+  -i,  --install    install all things needed by adaway-linux
+  -f,  --force      force the installation
+  -u,  --uninstall  remove all changes made by this script
+  -v,  --version    show current version of this script
+  -h,  --help       show this help
 ```
 * adaway-linux:
 ```
-You only have to run this script to add the ad-domains to your hosts file or to update them.
+You have only to run this script to add the ad-domains to your hosts file or to update them.
 Parameters:
     -h    --help      show help
     -s    --simulate  simulate, but don't replace hosts-file
