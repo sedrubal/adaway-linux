@@ -19,7 +19,7 @@ if [ "${1}" == "-h" ] || [ "${1}" == "--help" ] ; then
 
     echo "Welcome to adaway-linux, a small script to add domains hosting ads to the hosts file to block them."
     echo ""
-    echo "[!] please run ./install.sh before using this! It will backup your original hosts-file"
+    echo "[!] Please run ./install.sh before using this! It will backup your original hosts-file"
     echo ""
     echo "Usage:"
     echo "You have only to run this script to add the ad-domains to your hosts file or to update them."
@@ -39,53 +39,59 @@ fi
 
 # preparing temporary directory
 if [ -d "${TMPDIR}" ]; then
-    echo "[i] deleting directory ${TMPDIR}"
+    echo "[i] Deleting directory ${TMPDIR}"
     rm -r "${TMPDIR}"
 fi
 
-echo "[i] creating temporary directory ${TMPDIR}"
+echo "[i] Creating temporary directory ${TMPDIR}"
 mkdir -p "${TMPDIR}"
 
 # add domains from hosts-server listet in hostssources.lst
 while read src; do
     if [[ $src != "#*" ]] ; then
         # only insert entries redirecting to 127.0.0.1 or 0.0.0.0 (everything else might be a security nightmare)
-        curl --progress-bar -L "${src}" | sed 's/\r/\n/' | sed 's/\s\+/\t/' | sed 's/0\.0\.0\.0/127.0.0.1/' | grep '127\.0\.0\.1' >> "${TMPDIR}/hosts.downloaded"
+        curl --progress-bar -L "${src}" | sed 's/\r/\n/' | sed 's/\s\+/\t/' | sed 's/0\.0\.0\.0/127.0.0.1/' | grep '127\.0\.0\.1' >> "${TMPDIR}hosts.downloaded"
     else
         echo "[i] skipping $src"
     fi
 done <hostssources.lst
 
+echo "[i] Cleanup ${TMPDIR}hosts.downloaded and merge with original content"
+grep '^\([0-9]\|:\)' "${TMPDIR}hosts.downloaded" > "${TMPDIR}temp" && mv "${TMPDIR}temp" "${TMPDIR}hosts.downloaded" # Remove all lines that are not hosts entries
+sed 's/\(\t\| \)\+/ /g' "${TMPDIR}hosts.downloaded" > "${TMPDIR}temp" && mv "${TMPDIR}temp" "${TMPDIR}hosts.downloaded" # Replace all whitespace with spaces for neatness
+sed 's/ *\#.*/\r/g' "${TMPDIR}hosts.downloaded" > "${TMPDIR}temp" && mv "${TMPDIR}temp" "${TMPDIR}hosts.downloaded" # Remove remaining comments
+sed 's/^127\.0\.0\.1/0\.0\.0\.0/g' "${TMPDIR}hosts.downloaded" > "${TMPDIR}temp" && mv "${TMPDIR}temp" "${TMPDIR}hosts.downloaded" # Replace 127.0.0.0 with 0.0.0.0 (Shorter is faster!)
+sed '/localhost/d' "${TMPDIR}hosts.downloaded" > "${TMPDIR}temp" && mv "${TMPDIR}temp" "${TMPDIR}hosts.downloaded" # Remove additional localhost entries possibly picked up from sources
+uniq <(sort "${TMPDIR}hosts.downloaded") >> "${TMPDIR}hostsTemp"
+
 # fists lines of hosts-file
-echo "[i] add original hosts file from ${HOSTSORIG}"
-cat << EOF > "${TMPDIR}/hosts"
-# [!] This file will be updated by the ad-block-script called adaway-linux." >> "${TMPDIR}/hosts"
-# [!] If you want to edit the hosts-file, please edit the original file in ${HOSTSORIG}." >> "${TMPDIR}/hosts"
-# [!] Changes will be added to the top of this file." >> "${TMPDIR}/hosts"
+echo "[i] Adding original hosts file from ${HOSTSORIG}"
+cat << EOF > "${TMPDIR}header"
+# [!] This file will be updated by the ad-block-script called adaway-linux.
+# [!] If you want to edit the hosts-file, please edit the original file in ${HOSTSORIG}.
+# [!] Changes will be added to the top of this file.
 
 EOF
-cat "${HOSTSORIG}" >> "${TMPDIR}/hosts"
-cat << EOF >> "${TMPDIR}/hosts"
+cat "${HOSTSORIG}" >> "${TMPDIR}header"
+cat << EOF >> "${TMPDIR}header"
 
 # Ad Servers:
 
 EOF
-
-echo "[i] Cleanup ${TMPDIR}/hosts.downloaded and merge with original content"
-uniq <(sort "${TMPDIR}/hosts.downloaded") >> "${TMPDIR}/hosts"
+echo "$(cat "${TMPDIR}header" "${TMPDIR}hostsTemp")" > "${TMPDIR}hosts"
 
 # replacing hosts-file
 if [ "$1" != "-s" ] && [ "$1" != "--simulate" ] ; then
 
-    echo "[i] moving new hosts file to /etc/hosts"
-    mv "${TMPDIR}/hosts" /etc/hosts
+    echo "[i] Moving new hosts file to /etc/hosts"
+    mv "${TMPDIR}hosts" /etc/hosts
 
-    echo "[i] deleting directory ${TMPDIR}"
+    echo "[i] Deleting directory ${TMPDIR}"
     rm -r "${TMPDIR}"
 
 else
-    echo "[i] skipping replacing the hosts-file. You can see the hosts file there: ${TMPDIR}/hosts"
+    echo "[i] Skipping replacing the hosts-file. You can see the hosts file there: ${TMPDIR}hosts"
 fi
 
-echo "[i] finished"
+echo "[i] Finished"
 exit 0
