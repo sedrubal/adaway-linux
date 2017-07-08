@@ -18,7 +18,7 @@ VERSION="3.0"
 case "${1}" in
     "-u" | "--uninstall" )
         # uninstall
-        read -p "[?] Do you really want to uninstall adaway-linux and restore the original hosts-file? [Y/n] " REPLY
+        read -p "[?] Do you really want to uninstall adaway-linux and restore the original /etc/hosts? [Y/n] " REPLY
         case "${REPLY}" in
             "YES" | "Yes" | "yes" | "Y" | "y" | "" )
                 echo "[i] Restoring /etc/hosts"
@@ -43,8 +43,8 @@ case "${1}" in
             "YES" | "Yes" | "yes" | "Y" | "y" | "" )
                 # check if script wasn't started with the -f option
                 if [ "$2" != "-f" ] && [ "$ARG1" != "--force" ] ; then
-                    # backup hosts-file
-                    echo "[i] First I will backup the original hosts-file to ${HOSTS_ORIG}."
+                    # backup /etc/hosts
+                    echo "[i] First I will backup the original /etc/hosts to ${HOSTS_ORIG}."
                     sudo cp /etc/hosts "${HOSTS_ORIG}"
                     # check if backup was succesfully
                     if [ ! -e "${HOSTS_ORIG}" ] ; then

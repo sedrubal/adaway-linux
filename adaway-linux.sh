@@ -19,13 +19,13 @@ if [ "${1}" == "-h" ] || [ "${1}" == "--help" ] ; then
 
     echo "Welcome to adaway-linux, a small script to add domains hosting ads to the hosts file to block them."
     echo ""
-    echo "[!] Please run ./install.sh before using this! It will backup your original hosts-file"
+    echo "[!] Please run ./install.sh before using this! It will backup your original /etc/hosts"
     echo ""
     echo "Usage:"
     echo "You have only to run this script to add the ad-domains to your hosts file or to update them."
     echo "Parameters:"
     echo "    -h    --help      show help"
-    echo "    -s    --simulate  simulate, but don't replace hosts-file"
+    echo "    -s    --simulate  simulate, but don't replace /etc/hosts"
     echo ""
     exit 0
 
@@ -74,12 +74,12 @@ done <hostssources.lst
 
 uniq <(sort "${TMPDIR}hosts.downloaded") > "${TMPDIR}hosts.adservers"
 
-# fists lines of hosts-file
+# fists lines of /etc/hosts
 echo "[i] Adding original hosts file from ${HOSTSORIG}"
 cat << EOF > "${TMPDIR}hosts.header"
 # [!] This file will be updated by the ad-block-script called adaway-linux.
-# [!] If you want to edit the hosts-file, please edit the original file in ${HOSTSORIG}.
-# [!] Changes will be added to the top of this file.
+# [!] If you want to edit /etc/hosts, please edit the original file in ${HOSTSORIG}.
+# [!] Content from there will be added to the top of this file.
 
 EOF
 cat "${HOSTSORIG}" >> "${TMPDIR}hosts.header"
@@ -90,7 +90,7 @@ cat << EOF >> "${TMPDIR}hosts.header"
 EOF
 cat "${TMPDIR}hosts.header" "${TMPDIR}hosts.adservers" > "${TMPDIR}hosts"
 
-# replacing hosts-file
+# replacing /etc/hosts
 if [ "$1" != "-s" ] && [ "$1" != "--simulate" ] ; then
 
     echo "[i] Moving new hosts file to /etc/hosts"
@@ -100,7 +100,7 @@ if [ "$1" != "-s" ] && [ "$1" != "--simulate" ] ; then
     rm -r "${TMPDIR}"
 
 else
-    echo "[i] Skipping replacing the hosts-file. You can see the hosts file there: ${TMPDIR}hosts"
+    echo "[i] Skipping replacing /etc/hosts. You can see the hosts file there: ${TMPDIR}hosts"
 fi
 
 echo "[i] Finished"
