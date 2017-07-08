@@ -14,6 +14,8 @@ HOSTSORIG="/etc/.hosts.original"
 TMPDIR="/tmp/adaway-linux/"
 #
 
+set -e
+
 # show help
 if [ "${1}" == "-h" ] || [ "${1}" == "--help" ] ; then
 

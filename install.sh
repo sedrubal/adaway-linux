@@ -15,10 +15,12 @@ SRCLST="hostssources.lst"
 VERSION="3.0"
 #
 
+set -e
+
 case "${1}" in
     "-u" | "--uninstall" )
         # uninstall
-        read -p "[?] Do you really want to uninstall adaway-linux and restore the original /etc/hosts? [Y/n] " REPLY
+        read -r -p "[?] Do you really want to uninstall adaway-linux and restore the original /etc/hosts? [Y/n] " REPLY
         case "${REPLY}" in
             "YES" | "Yes" | "yes" | "Y" | "y" | "" )
                 echo "[i] Restoring /etc/hosts"
@@ -38,7 +40,7 @@ case "${1}" in
         "-i" | "--install" )
         echo "Welcome to the install-script for adaway-linux."
         echo "[!] Please run this only ONCE! Cancel, if you already modified /etc/hosts by adaway-linux.sh."
-        read -p "[?] Proceed? [Y/n] " REPLY
+        read -r -p "[?] Proceed? [Y/n] " REPLY
         case "${REPLY}" in
             "YES" | "Yes" | "yes" | "Y" | "y" | "" )
                 # check if script wasn't started with the -f option
@@ -64,7 +66,7 @@ EOF
                 echo "[i] File created."
 
                 # add cronjob
-                read -p "[?] Create a cronjob which updates /etc/hosts with new adservers every 5 days? [Y/n] " REPLY
+                read -r -p "[?] Create a cronjob which updates /etc/hosts with new adservers every 5 days? [Y/n] " REPLY
                 case "${REPLY}" in
                     "YES" | "Yes" | "yes" | "Y" | "y" | "" )
                         echo "[i] Creating cronjob..."
