@@ -48,37 +48,47 @@ mkdir -p "${TMPDIR}"
 
 # add domains from hosts-server listet in hostssources.lst
 while read src; do
-    if [[ $src != "#*" ]] ; then
-        # only insert entries redirecting to 127.0.0.1 or 0.0.0.0 (everything else might be a security nightmare)
-        curl --progress-bar -L "${src}" | sed 's/\r/\n/' | sed 's/\s\+/\t/' | sed 's/0\.0\.0\.0/127.0.0.1/' | grep '127\.0\.0\.1' >> "${TMPDIR}hosts.downloaded"
+    if [[ "${src}" != "#*" ]] ; then
+        echo "[i] Downloading and cleaning up ${src}"
+        # download and cleanup:
+        # - replace \r\n to unix \n
+        # - remove leading whitespaces
+        # - replace 127.0.0.1 with 0.0.0.0 (shorter, unspecified)
+        # - use only host entries redirecting to 0.0.0.0 (no empty line, no comment lines, no dangerous redirects to other sites
+        # - remove additional localhost entries possibly picked up from sources
+        # - remove remaining comments
+        # - split all entries with one tab
+        curl --progress-bar -L "${src}" \
+            | sed 's/\r/\n/' \
+            | sed 's/^\s\+//' \
+            | sed 's/^127\.0\.0\.1/0.0.0.0/' \
+            | grep '^0\.0\.0\.0' \
+            | grep -v '\slocalhost\s*' \
+            | sed 's/\s*\#.*//g' \
+            | sed 's/\s\+/\t/g' \
+            >> "${TMPDIR}hosts.downloaded"
     else
         echo "[i] skipping $src"
     fi
 done <hostssources.lst
 
-echo "[i] Cleanup ${TMPDIR}hosts.downloaded and merge with original content"
-grep '^\([0-9]\|:\)' "${TMPDIR}hosts.downloaded" > "${TMPDIR}temp" && mv "${TMPDIR}temp" "${TMPDIR}hosts.downloaded" # Remove all lines that are not hosts entries
-sed 's/\(\t\| \)\+/ /g' "${TMPDIR}hosts.downloaded" > "${TMPDIR}temp" && mv "${TMPDIR}temp" "${TMPDIR}hosts.downloaded" # Replace all whitespace with spaces for neatness
-sed 's/ *\#.*/\r/g' "${TMPDIR}hosts.downloaded" > "${TMPDIR}temp" && mv "${TMPDIR}temp" "${TMPDIR}hosts.downloaded" # Remove remaining comments
-sed 's/^127\.0\.0\.1/0\.0\.0\.0/g' "${TMPDIR}hosts.downloaded" > "${TMPDIR}temp" && mv "${TMPDIR}temp" "${TMPDIR}hosts.downloaded" # Replace 127.0.0.0 with 0.0.0.0 (Shorter is faster!)
-sed '/localhost/d' "${TMPDIR}hosts.downloaded" > "${TMPDIR}temp" && mv "${TMPDIR}temp" "${TMPDIR}hosts.downloaded" # Remove additional localhost entries possibly picked up from sources
-uniq <(sort "${TMPDIR}hosts.downloaded") >> "${TMPDIR}hostsTemp"
+uniq <(sort "${TMPDIR}hosts.downloaded") > "${TMPDIR}hosts.adservers"
 
 # fists lines of hosts-file
 echo "[i] Adding original hosts file from ${HOSTSORIG}"
-cat << EOF > "${TMPDIR}header"
+cat << EOF > "${TMPDIR}hosts.header"
 # [!] This file will be updated by the ad-block-script called adaway-linux.
 # [!] If you want to edit the hosts-file, please edit the original file in ${HOSTSORIG}.
 # [!] Changes will be added to the top of this file.
 
 EOF
-cat "${HOSTSORIG}" >> "${TMPDIR}header"
-cat << EOF >> "${TMPDIR}header"
+cat "${HOSTSORIG}" >> "${TMPDIR}hosts.header"
+cat << EOF >> "${TMPDIR}hosts.header"
 
 # Ad Servers:
 
 EOF
-echo "$(cat "${TMPDIR}header" "${TMPDIR}hostsTemp")" > "${TMPDIR}hosts"
+cat "${TMPDIR}hosts.header" "${TMPDIR}hosts.adservers" > "${TMPDIR}hosts"
 
 # replacing hosts-file
 if [ "$1" != "-s" ] && [ "$1" != "--simulate" ] ; then
