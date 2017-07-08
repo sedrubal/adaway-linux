@@ -38,7 +38,7 @@ Parameters:
 
 Operation
 ---------
-All domains will be listed in `/etc/hosts` and therefore any request to them will be redirected to localhost or a dummy IP (127.0.0.1, 0.0.0.0, ...)
+All domains will be listed in `/etc/hosts` and therefore any request to them will be redirected to a dummy IP (`0.0.0.0`).
 
 Efficiency
 ----------
@@ -47,10 +47,9 @@ Efficiency
 + if you want to add or remove something manually from `/etc/hosts`, you have to do this in the backup file
 + maybe plugins like AdBlock will work better...
 
-Other
------
-- Version: v2.0
-- Licence: CC BY-SA 4.0
+LICENSE
+-------
+- [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)
 
 Please report bugs or fork this repo and help to improve this script.
 Thank you ;)
