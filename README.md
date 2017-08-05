@@ -1,16 +1,13 @@
-adaway-linux
-============
+# adaway-linux
 
 A small script to block ad-containing sites in your whole Linux system.
 
-Features
---------
+## Features
 * install-script (also supports uninstall)
 * update hosts from hosts-servers (like https://adaway.org/hosts.txt)
 * cron job support
 
-Usage
------
+## Usage
 * install.sh:
 ```
 Usage: ./install.sh [OPTION]
@@ -36,19 +33,17 @@ Parameters:
     -s    --simulate  simulate, but don't replace /etc/hosts
 ```
 
-Operation
----------
-All domains will be listed in `/etc/hosts` and therefore any request to them will be redirected to a dummy IP (`0.0.0.0`).
+## How it works
+All ad hosting domains will be listed in `/etc/hosts` and therefore any request to them will be redirected to a dummy IP (`0.0.0.0`).
+The list of blocked domains is fetched and can be updated from servers listed in `./hostssources.lst`.
 
-Efficiency
-----------
+## Drawbacks
 + theoretical it should work fine, but it's difficult to get all domains witch host advertisements
 + `/etc/hosts` file may be very confusing
-+ if you want to add or remove something manually from `/etc/hosts`, you have to do this in the backup file
-+ maybe plugins like AdBlock will work better...
++ if you want to add or remove something manually from `/etc/hosts`, you have to do this in the backup file (`/etc/.hosts.original`)
++ maybe plugins like [uBlock origin](https://addons.mozilla.org/en-US/firefox/addon/ublock-origin) will work better as they remove placeholders, too.
 
-LICENSE
--------
+## LICENSE
 - [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)
 
 Please report bugs or fork this repo and help to improve this script.
