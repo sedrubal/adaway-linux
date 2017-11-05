@@ -72,7 +72,7 @@ while read src; do
     else
         echo "[i] skipping $src"
     fi
-done <hostssources.lst
+done < $(dirname $0)/hostssources.lst
 
 uniq <(sort "${TMPDIR}hosts.downloaded") > "${TMPDIR}hosts.adservers"
 
