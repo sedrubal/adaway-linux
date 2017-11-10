@@ -4,7 +4,7 @@
 # Remove ads system-wide in Linux                           #
 #############################################################
 # authors:  sedrubal, diy-electronics                       #
-# version:  v3.0                                            #
+# version:  v3.1                                            #
 # licence:  CC BY-SA 4.0                                    #
 # github:   https://github.com/sedrubal/adaway-linux        #
 #############################################################
@@ -12,6 +12,7 @@
 # settings
 HOSTSORIG="/etc/.hosts.original"
 TMPDIR="/tmp/adaway-linux/"
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" # Gets the location of the script
 #
 
 set -e
@@ -60,7 +61,7 @@ while read src; do
         # - remove additional localhost entries possibly picked up from sources
         # - remove remaining comments
         # - split all entries with one tab
-        curl --progress-bar -L "${src}" \
+wget  "${src}"  -nv --show-progress -L -O - \
             | sed 's/\r/\n/' \
             | sed 's/^\s\+//' \
             | sed 's/^127\.0\.0\.1/0.0.0.0/' \
@@ -72,7 +73,7 @@ while read src; do
     else
         echo "[i] skipping $src"
     fi
-done < $(dirname $0)/hostssources.lst
+done < $DIR/hostssources.lst
 
 uniq <(sort "${TMPDIR}hosts.downloaded") > "${TMPDIR}hosts.adservers"
 
