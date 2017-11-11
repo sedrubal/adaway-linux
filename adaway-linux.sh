@@ -14,6 +14,8 @@ HOSTSORIG="/etc/.hosts.original"
 TMPDIR="/tmp/adaway-linux/"
 #
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" # Gets the location of the script
+
 set -e
 
 # show help
@@ -77,7 +79,7 @@ while read src; do
     else
         echo "[i] skipping $src"
     fi
-done < $(dirname $0)/hostssources.lst
+done < $DIR/hostssources.lst
 
 uniq <(sort "${TMPDIR}hosts.downloaded") > "${TMPDIR}hosts.adservers"
 
