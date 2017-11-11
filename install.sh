@@ -4,18 +4,27 @@
 # Remove ads system-wide in Linux                         #
 ###########################################################
 # authors:      sedrubal, diy-electronics                 #
-# version:      v3.0                                      #
+# version:      v3.2                                      #
 # licence:      CC BY-SA 4.0                              #
 # github:       https://github.com/sedrubal/adaway-linux  #
 ###########################################################
 
 # settings
 HOSTS_ORIG="/etc/.hosts.original"
-SRCLST="hostssources.lst"
-VERSION="3.0"
+SYSTEMD_DIR="/etc/systemd/system"
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" # Gets the location of the script
+SRCLST="$DIR/hostssources.lst"
+VERSION="3.2"
 #
 
+
 set -e
+
+# check root
+if [ "$(id -u)" != "0" ] ; then
+    echo "This script must be run as root" 1>&2
+    exit 1
+fi
 
 case "${1}" in
     "-u" | "--uninstall" )
@@ -23,13 +32,24 @@ case "${1}" in
         read -r -p "[?] Do you really want to uninstall adaway-linux and restore the original /etc/hosts? [Y/n] " REPLY
         case "${REPLY}" in
             "YES" | "Yes" | "yes" | "Y" | "y" | "" )
+                if [ -e ${SYSTEMD_DIR}/adaway-linux.timer ] || [ -e ${SYSTEMD_DIR}/adaway-linux.service ] ; then
+                  echo "[!] Removing services..."
+                  # Unhooking the systemd service
+                  systemctl stop adaway-linux.service
+                  systemctl stop adaway-linux.timer
+                  systemctl disable adaway-linux.service || echo "[!] adaway-linux.service is missing. Have you removed it?"
+                  systemctl disable adaway-linux.timer || echo "[!] adaway-linux.timer is missing. Have you removed it?"
+                  rm ${SYSTEMD_DIR}/adaway-linux.*
+                else
+                  echo "[i] No adaway service installed. Skipping.."
+                fi
                 echo "[i] Restoring /etc/hosts"
-                sudo mv "${HOSTS_ORIG}" /etc/hosts
-                echo "[!] If you added a cronjob, please remove it yourself."
+                mv "${HOSTS_ORIG}" /etc/hosts || echo "[!] Couldn't restore original hosts file."
+
                 echo "[i] finished"
                 exit 0
                 ;;
-            "NO" | "No" | "no" | "N" | "n" )
+            * | "NO" | "No" | "no" | "N" | "n" )
                 echo "[i] cancelled"
                 exit 1
                 ;;
@@ -47,7 +67,7 @@ case "${1}" in
                 if [ "$2" != "-f" ] && [ "$ARG1" != "--force" ] ; then
                     # backup /etc/hosts
                     echo "[i] First I will backup the original /etc/hosts to ${HOSTS_ORIG}."
-                    sudo cp /etc/hosts "${HOSTS_ORIG}"
+                    cp /etc/hosts "${HOSTS_ORIG}"
                     # check if backup was succesfully
                     if [ ! -e "${HOSTS_ORIG}" ] ; then
                         echo "[!] Backup of /etc/hosts failed. Please backup this file manually and bypass this check by using the -f parameter."
@@ -65,23 +85,50 @@ https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&mimet
 EOF
                 echo "[i] File created."
 
-                # add cronjob
-                read -r -p "[?] Create a cronjob which updates /etc/hosts with new adservers every 5 days? [Y/n] " REPLY
+                # add systemd service
+                read -r -p "[?] Create a systemd service which updates /etc/hosts with new adservers every week? [Y/n] " REPLY
                 case "${REPLY}" in
                     "YES" | "Yes" | "yes" | "Y" | "y" | "" )
-                        echo "[i] Creating cronjob..."
-                        line="1 12 */5 * * ${PWD}/adaway-linux.sh"
-                        (sudo crontab -u root -l; echo "$line" ) | sudo crontab -u root -
+                        echo "[i] Creating service..."
+
+                        # create .service file
+                        cat > "${SYSTEMD_DIR}/adaway-linux.service" <<EOL
+[Unit]
+Description=Service to run adaway-linux weekly
+
+[Service]
+ExecStart=$DIR/adaway-linux.sh
+EOL
+
+                        # create .timer file
+                        cat > "${SYSTEMD_DIR}/adaway-linux.timer" <<EOL
+[Unit]
+Description=Run adaway-linux weekly
+
+[Timer]
+OnCalendar=weekly
+Persistent=true
+Unit=adaway-linux.service
+
+[Install]
+WantedBy=timers.target
+EOL
+                        chmod 755 ${SYSTEMD_DIR}/adaway-linux.*
+
+                        # Enable the schedule
+                        systemctl enable adaway-linux.timer
+                        systemctl start adaway-linux.timer && echo "[i] Service succesfully initialized."
+
                         ;;
-                    "NO" | "No" | "no" | "N" | "n" )
-                        echo "[i] No cronjob created."
+                      * | "NO" | "No" | "no" | "N" | "n" )
+                        echo "[i] No service created."
                         ;;
                 esac
 
                 echo "[i] finished. For uninstall, please run ${0} -u"
                 exit 0
                 ;;
-            "NO" | "No" | "no" | "N" | "n" )
+            * | "NO" | "No" | "no" | "N" | "n" )
                 echo "[i] cancelled"
                 exit 1
                 ;;
