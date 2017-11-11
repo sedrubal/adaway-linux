@@ -35,6 +35,8 @@ case "${1}" in
                 if [ -e ${SYSTEMD_DIR}/adaway-linux.timer ] || [ -e ${SYSTEMD_DIR}/adaway-linux.service ] ; then
                   echo "[!] Removing services..."
                   # Unhooking the systemd service
+                  systemctl stop adaway-linux.service
+                  systemctl stop adaway-linux.timer
                   systemctl disable adaway-linux.service || echo "[!] adaway-linux.service is missing. Have you removed it?"
                   systemctl disable adaway-linux.timer || echo "[!] adaway-linux.timer is missing. Have you removed it?"
                   rm ${SYSTEMD_DIR}/adaway-linux.*
@@ -114,7 +116,8 @@ EOL
                         chmod 755 ${SYSTEMD_DIR}/adaway-linux.*
 
                         # Enable the schedule
-                        systemctl enable adaway-linux.timer && echo "[i] Service succesfully installed."
+                        systemctl enable adaway-linux.timer
+                        systemctl start adaway-linux.timer && echo "[i] Service succesfully initialized."
 
                         ;;
                       * | "NO" | "No" | "no" | "N" | "n" )
