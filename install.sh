@@ -13,6 +13,7 @@
 HOSTS_ORIG="/etc/.hosts.original"
 SRCLST="hostssources.lst"
 VERSION="3.0"
+SYSTEMD_DIR="/etc/systemd/system"
 #
 
 set -e
@@ -23,9 +24,21 @@ case "${1}" in
         read -r -p "[?] Do you really want to uninstall adaway-linux and restore the original /etc/hosts? [Y/n] " REPLY
         case "${REPLY}" in
             "YES" | "Yes" | "yes" | "Y" | "y" | "" )
+                if [ -e ${SYSTEMD_DIR}/adaway-linux.timer ] || [ -e ${SYSTEMD_DIR}/adaway-linux.service ] ; then
+
+                  echo "[!] Removing services..."
+                  # Unhooking the systemd service
+                  systemctl stop adaway-linux.service
+                  systemctl stop adaway-linux.timer
+                  systemctl disable adaway-linux.service || echo "[!] adaway-linux.service is missing. Have you removed it?"
+                  systemctl disable adaway-linux.timer || echo "[!] adaway-linux.timer is missing. Have you removed it?"
+                  rm ${SYSTEMD_DIR}/adaway-linux.*
+                else
+                  echo "[i] No systemd service installed. Skipping.."
+                  echo "[!] If you added a cronjob, please remove it yourself."
+                fi
                 echo "[i] Restoring /etc/hosts"
                 sudo mv "${HOSTS_ORIG}" /etc/hosts
-                echo "[!] If you added a cronjob, please remove it yourself."
                 echo "[i] finished"
                 exit 0
                 ;;
@@ -66,15 +79,50 @@ EOF
                 echo "[i] File created."
 
                 # add cronjob
-                read -r -p "[?] Create a cronjob which updates /etc/hosts with new adservers every 5 days? [Y/n] " REPLY
+                read -r -p "[?] Create a cronjob/systemd-service which updates /etc/hosts with new adservers once a week? [Cronjob/Systemd/N] " REPLY
                 case "${REPLY}" in
-                    "YES" | "Yes" | "yes" | "Y" | "y" | "" )
+                    "cronjob" | "Cronjob" | "CRONJOB" | "CronJob" | "crontab" | "Crontab" | "CRONTAB" | "CronTab" | "cron" | "Cron" | "CRON" | "c" | "C")
                         echo "[i] Creating cronjob..."
                         line="1 12 */5 * * ${PWD}/adaway-linux.sh"
                         (sudo crontab -u root -l; echo "$line" ) | sudo crontab -u root -
                         ;;
+                    "systemd" | "Systemd" | "SYSTEMD" | "sys" | "Sys" | "SYS" | "S" | "s")
+                        echo "[i] Creating systemd service..."
+
+                        # create .service file
+                        cat > "${SYSTEMD_DIR}/adaway-linux.service" <<EOL
+[Unit]
+Description=Service to run adaway-linux weekly
+Documentation=https://github.com/sedrubal/adaway-linux/
+After=network.target
+
+[Service]
+ExecStart=$DIR/adaway-linux.sh
+EOL
+
+                        # create .timer file
+                        cat > "${SYSTEMD_DIR}/adaway-linux.timer" <<EOL
+[Unit]
+Description=Timer that runs adaway-linux.service weekly
+Documentation=https://github.com/sedrubal/adaway-linux/
+After=network.target
+
+[Timer]
+OnCalendar=weekly
+Persistent=true
+Unit=adaway-linux.service
+
+[Install]
+WantedBy=timers.target
+EOL
+                        chmod 750 ${SYSTEMD_DIR}/adaway-linux.*
+
+                        # Enable the schedule
+                        systemctl enable adaway-linux.timer
+                        systemctl start adaway-linux.timer && echo "[i] Systemd service succesfully initialized."
+                        ;;
                     "NO" | "No" | "no" | "N" | "n" )
-                        echo "[i] No cronjob created."
+                        echo "[i] No schedule created."
                         ;;
                 esac
 
