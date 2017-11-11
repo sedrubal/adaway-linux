@@ -28,11 +28,11 @@ case "${1}" in
 
                   echo "[!] Removing services..."
                   # Unhooking the systemd service
-                  systemctl stop adaway-linux.service
-                  systemctl stop adaway-linux.timer
-                  systemctl disable adaway-linux.service || echo "[!] adaway-linux.service is missing. Have you removed it?"
-                  systemctl disable adaway-linux.timer || echo "[!] adaway-linux.timer is missing. Have you removed it?"
-                  rm ${SYSTEMD_DIR}/adaway-linux.*
+                  sudo systemctl stop adaway-linux.service
+                  sudo systemctl stop adaway-linux.timer
+                  sudo systemctl disable adaway-linux.service || echo "[!] adaway-linux.service is missing. Have you removed it?"
+                  sudo systemctl disable adaway-linux.timer || echo "[!] adaway-linux.timer is missing. Have you removed it?"
+                  sudo rm ${SYSTEMD_DIR}/adaway-linux.*
                 else
                   echo "[i] No systemd service installed. Skipping.."
                   echo "[!] If you added a cronjob, please remove it yourself."
@@ -90,7 +90,7 @@ EOF
                         echo "[i] Creating systemd service..."
 
                         # create .service file
-                        cat > "${SYSTEMD_DIR}/adaway-linux.service" <<EOL
+                        sudo cat > "${SYSTEMD_DIR}/adaway-linux.service" <<EOL
 [Unit]
 Description=Service to run adaway-linux weekly
 Documentation=https://github.com/sedrubal/adaway-linux/
@@ -101,7 +101,7 @@ ExecStart=$DIR/adaway-linux.sh
 EOL
 
                         # create .timer file
-                        cat > "${SYSTEMD_DIR}/adaway-linux.timer" <<EOL
+                        sudo cat > "${SYSTEMD_DIR}/adaway-linux.timer" <<EOL
 [Unit]
 Description=Timer that runs adaway-linux.service weekly
 Documentation=https://github.com/sedrubal/adaway-linux/
@@ -115,11 +115,11 @@ Unit=adaway-linux.service
 [Install]
 WantedBy=timers.target
 EOL
-                        chmod 750 ${SYSTEMD_DIR}/adaway-linux.*
+                        sudo chmod 750 ${SYSTEMD_DIR}/adaway-linux.*
 
                         # Enable the schedule
-                        systemctl enable adaway-linux.timer
-                        systemctl start adaway-linux.timer && echo "[i] Systemd service succesfully initialized."
+                        sudo systemctl enable adaway-linux.timer
+                        sudo systemctl start adaway-linux.timer && echo "[i] Systemd service succesfully initialized."
                         ;;
                     "NO" | "No" | "no" | "N" | "n" )
                         echo "[i] No schedule created."
