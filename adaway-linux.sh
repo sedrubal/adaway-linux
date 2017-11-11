@@ -61,7 +61,9 @@ while read src; do
         # - remove additional localhost entries possibly picked up from sources
         # - remove remaining comments
         # - split all entries with one tab
-wget  "${src}"  -nv --show-progress -L -O - \
+        #which curl;
+        if type curl 2>/dev/null > /dev/null; then
+          curl --progress-bar -L "${src}" \
             | sed 's/\r/\n/' \
             | sed 's/^\s\+//' \
             | sed 's/^127\.0\.0\.1/0.0.0.0/' \
@@ -69,12 +71,22 @@ wget  "${src}"  -nv --show-progress -L -O - \
             | grep -v '\slocalhost\s*' \
             | sed 's/\s*\#.*//g' \
             | sed 's/\s\+/\t/g' \
-            >> "${TMPDIR}hosts.downloaded"
-    else
+            >> "${TMPDIR}hosts.downloaded";
+        else
+          wget  "${src}" -nv --show-progress -L -O - \
+            | sed 's/\r/\n/' \
+            | sed 's/^\s\+//' \
+            | sed 's/^127\.0\.0\.1/0.0.0.0/' \
+            | grep '^0\.0\.0\.0' \
+            | grep -v '\slocalhost\s*' \
+            | sed 's/\s*\#.*//g' \
+            | sed 's/\s\+/\t/g' \
+            >> "${TMPDIR}hosts.downloaded";
+        fi
+      else
         echo "[i] skipping $src"
     fi
 done < $DIR/hostssources.lst
-
 uniq <(sort "${TMPDIR}hosts.downloaded") > "${TMPDIR}hosts.adservers"
 
 # fists lines of /etc/hosts
