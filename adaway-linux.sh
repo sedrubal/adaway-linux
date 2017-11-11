@@ -61,7 +61,6 @@ while read src; do
         # - remove additional localhost entries possibly picked up from sources
         # - remove remaining comments
         # - split all entries with one tab
-        #which curl;
         if type curl 2>/dev/null > /dev/null; then
           curl --progress-bar -L "${src}" \
             | sed 's/\r/\n/' \
