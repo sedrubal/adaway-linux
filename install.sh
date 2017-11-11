@@ -11,7 +11,8 @@
 
 # settings
 HOSTS_ORIG="/etc/.hosts.original"
-SRCLST="hostssources.lst"
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" # Gets the location of the script
+SRCLST="$DIR/hostssources.lst"
 VERSION="3.0"
 #
 
