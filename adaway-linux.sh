@@ -79,6 +79,7 @@ while read src; do
     else
         echo "[i] skipping $src"
     fi
+
 done < "${SCRIPT_DIR}/hostssources.lst"
 
 uniq <(sort "${TMPDIR}hosts.downloaded") > "${TMPDIR}hosts.adservers"
