@@ -24,21 +24,29 @@ case "${1}" in
         read -r -p "[?] Do you really want to uninstall adaway-linux and restore the original /etc/hosts? [Y/n] " REPLY
         case "${REPLY}" in
             "YES" | "Yes" | "yes" | "Y" | "y" | "" )
+
+                # check root
+                if [ "${UID}" != "0" ] ; then
+                  echo "For this action the script must be run as root" 1>&2
+                  exit 1
+                fi
+
+                # check if systemd services are installed
                 if [ -e ${SYSTEMD_DIR}/adaway-linux.timer ] || [ -e ${SYSTEMD_DIR}/adaway-linux.service ] ; then
 
                   echo "[!] Removing services..."
                   # Unhooking the systemd service
-                  sudo systemctl stop adaway-linux.service
-                  sudo systemctl stop adaway-linux.timer
-                  sudo systemctl disable adaway-linux.service || echo "[!] adaway-linux.service is missing. Have you removed it?"
-                  sudo systemctl disable adaway-linux.timer || echo "[!] adaway-linux.timer is missing. Have you removed it?"
-                  sudo rm ${SYSTEMD_DIR}/adaway-linux.*
+                  systemctl stop adaway-linux.service
+                  systemctl stop adaway-linux.timer
+                  systemctl disable adaway-linux.service || echo "[!] adaway-linux.service is missing. Have you removed it?"
+                  systemctl disable adaway-linux.timer || echo "[!] adaway-linux.timer is missing. Have you removed it?"
+                  rm ${SYSTEMD_DIR}/adaway-linux.*
                 else
                   echo "[i] No systemd service installed. Skipping.."
                   echo "[!] If you added a cronjob, please remove it yourself."
                 fi
                 echo "[i] Restoring /etc/hosts"
-                sudo mv "${HOSTS_ORIG}" /etc/hosts
+                mv "${HOSTS_ORIG}" /etc/hosts
                 echo "[i] finished"
                 exit 0
                 ;;
@@ -56,11 +64,17 @@ case "${1}" in
         read -r -p "[?] Proceed? [Y/n] " REPLY
         case "${REPLY}" in
             "YES" | "Yes" | "yes" | "Y" | "y" | "" )
+                # check root
+                if [ "${UID}" != "0" ] ; then
+                  echo "For this action the script must be run as root" 1>&2
+                  exit 1
+                fi
+
                 # check if script wasn't started with the -f option
                 if [ "$2" != "-f" ] && [ "$ARG1" != "--force" ] ; then
                     # backup /etc/hosts
                     echo "[i] First I will backup the original /etc/hosts to ${HOSTS_ORIG}."
-                    sudo cp /etc/hosts "${HOSTS_ORIG}"
+                    cp /etc/hosts "${HOSTS_ORIG}"
                     # check if backup was succesfully
                     if [ ! -e "${HOSTS_ORIG}" ] ; then
                         echo "[!] Backup of /etc/hosts failed. Please backup this file manually and bypass this check by using the -f parameter."
@@ -77,20 +91,21 @@ https://hosts-file.net/ad_servers.txt
 https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&mimetype=plaintext
 EOF
                 echo "[i] File created."
-
+                chmod 777 "hostssources.lst" # Allows the user to edit the file which is created by root.
+                
                 # add cronjob
                 read -r -p "[?] Create a cronjob/systemd-service which updates /etc/hosts with new adservers once a week? [Cronjob/Systemd/N] " REPLY
                 case "${REPLY}" in
                     "cronjob" | "Cronjob" | "CRONJOB" | "CronJob" | "crontab" | "Crontab" | "CRONTAB" | "CronTab" | "cron" | "Cron" | "CRON" | "c" | "C")
                         echo "[i] Creating cronjob..."
                         line="1 12 */5 * * ${PWD}/adaway-linux.sh"
-                        (sudo crontab -u root -l; echo "$line" ) | sudo crontab -u root -
+                        (crontab -u root -l; echo "$line" ) | crontab -u root -
                         ;;
                     "systemd" | "Systemd" | "SYSTEMD" | "sys" | "Sys" | "SYS" | "S" | "s")
                         echo "[i] Creating systemd service..."
 
                         # create .service file
-                        sudo cat > "${SYSTEMD_DIR}/adaway-linux.service" <<EOL
+                        cat > "${SYSTEMD_DIR}/adaway-linux.service" <<EOL
 [Unit]
 Description=Service to run adaway-linux weekly
 Documentation=https://github.com/sedrubal/adaway-linux/
@@ -101,7 +116,7 @@ ExecStart=$DIR/adaway-linux.sh
 EOL
 
                         # create .timer file
-                        sudo cat > "${SYSTEMD_DIR}/adaway-linux.timer" <<EOL
+                        cat > "${SYSTEMD_DIR}/adaway-linux.timer" <<EOL
 [Unit]
 Description=Timer that runs adaway-linux.service weekly
 Documentation=https://github.com/sedrubal/adaway-linux/
@@ -115,11 +130,11 @@ Unit=adaway-linux.service
 [Install]
 WantedBy=timers.target
 EOL
-                        sudo chmod 750 ${SYSTEMD_DIR}/adaway-linux.*
+                        chmod 750 ${SYSTEMD_DIR}/adaway-linux.*
 
                         # Enable the schedule
-                        sudo systemctl enable adaway-linux.timer
-                        sudo systemctl start adaway-linux.timer && echo "[i] Systemd service succesfully initialized."
+                        systemctl enable adaway-linux.timer
+                        systemctl start adaway-linux.timer && echo "[i] Systemd service succesfully initialized."
                         ;;
                     "NO" | "No" | "no" | "N" | "n" )
                         echo "[i] No schedule created."
