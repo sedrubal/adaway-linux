@@ -11,11 +11,10 @@
 
 # settings
 HOSTS_ORIG="/etc/.hosts.original"
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" # Gets the location of the script
-SRCLST="$DIR/hostssources.lst"
+SCRIPT_DIR="$(cd "$(dirname "${0}")" && pwd)"  # Gets the location of the script
+SRCLST="${SCRIPT_DIR}/hostssources.lst"
 VERSION="3.0"
 SYSTEMD_DIR="/etc/systemd/system"
-SCRIPT_DIR="$(cd "$(dirname "$0")" || exit ; pwd -P)"
 #
 
 set -e
