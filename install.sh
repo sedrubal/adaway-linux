@@ -11,7 +11,8 @@
 
 # settings
 HOSTS_ORIG="/etc/.hosts.original"
-SRCLST="hostssources.lst"
+SCRIPT_DIR="$(cd "$(dirname "${0}")" && pwd)"  # Gets the location of the script
+SRCLST="${SCRIPT_DIR}/hostssources.lst"
 VERSION="3.0"
 SYSTEMD_DIR="/etc/systemd/system"
 #
@@ -36,10 +37,10 @@ case "${1}" in
 
                   echo "[!] Removing services..."
                   # Unhooking the systemd service
-                  systemctl stop adaway-linux.service
                   systemctl stop adaway-linux.timer
-                  systemctl disable adaway-linux.service || echo "[!] adaway-linux.service is missing. Have you removed it?"
+                  systemctl stop adaway-linux.service
                   systemctl disable adaway-linux.timer || echo "[!] adaway-linux.timer is missing. Have you removed it?"
+                  systemctl disable adaway-linux.service || echo "[!] adaway-linux.service is missing. Have you removed it?"
                   rm ${SYSTEMD_DIR}/adaway-linux.*
                 else
                   echo "[i] No systemd service installed. Skipping.."
@@ -94,7 +95,7 @@ EOF
                 chmod 777 "hostssources.lst" # Allows the user to edit the file which is created by root.
                 
                 # add cronjob
-                read -r -p "[?] Create a cronjob/systemd-service which updates /etc/hosts with new adservers once a week? [Cronjob/Systemd/N] " REPLY
+                read -r -p "[?] Create a cronjob/systemd-service which updates /etc/hosts with new adservers once a week? [systemd/cronjob/N] " REPLY
                 case "${REPLY}" in
                     "cronjob" | "Cronjob" | "CRONJOB" | "CronJob" | "crontab" | "Crontab" | "CRONTAB" | "CronTab" | "cron" | "Cron" | "CRON" | "c" | "C")
                         echo "[i] Creating cronjob..."
@@ -105,18 +106,18 @@ EOF
                         echo "[i] Creating systemd service..."
 
                         # create .service file
-                        cat > "${SYSTEMD_DIR}/adaway-linux.service" <<EOL
+                        sh -c "cat > \"${SYSTEMD_DIR}/adaway-linux.service\" <<EOL
 [Unit]
 Description=Service to run adaway-linux weekly
 Documentation=https://github.com/sedrubal/adaway-linux/
 After=network.target
 
 [Service]
-ExecStart=$DIR/adaway-linux.sh
-EOL
+ExecStart=${SCRIPT_DIR}/adaway-linux.sh
+EOL"
 
                         # create .timer file
-                        cat > "${SYSTEMD_DIR}/adaway-linux.timer" <<EOL
+                        sh -c "cat > \"${SYSTEMD_DIR}/adaway-linux.timer\" <<EOL
 [Unit]
 Description=Timer that runs adaway-linux.service weekly
 Documentation=https://github.com/sedrubal/adaway-linux/
@@ -129,8 +130,8 @@ Unit=adaway-linux.service
 
 [Install]
 WantedBy=timers.target
-EOL
-                        chmod 750 ${SYSTEMD_DIR}/adaway-linux.*
+EOL"
+                        chmod u=rw,g=r,o=r ${SYSTEMD_DIR}/adaway-linux.*
 
                         # Enable the schedule
                         systemctl enable adaway-linux.timer

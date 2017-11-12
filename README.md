@@ -5,7 +5,7 @@ A small script to block ad-containing sites in your whole Linux system.
 ## Features
 * install-script (also supports uninstall)
 * update hosts from hosts-servers (like https://adaway.org/hosts.txt)
-* cron job support
+* cron job and systemd.timer support
 
 ## Usage
 * install.sh:
