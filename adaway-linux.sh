@@ -60,15 +60,20 @@ while read src; do
         # - remove additional localhost entries possibly picked up from sources
         # - remove remaining comments
         # - split all entries with one tab
-        curl --progress-bar -L "${src}" \
-            | sed 's/\r/\n/' \
-            | sed 's/^\s\+//' \
-            | sed 's/^127\.0\.0\.1/0.0.0.0/' \
-            | grep '^0\.0\.0\.0' \
-            | grep -v '\slocalhost\s*' \
-            | sed 's/\s*\#.*//g' \
-            | sed 's/\s\+/\t/g' \
-            >> "${TMPDIR}hosts.downloaded"
+        if type curl 2>/dev/null > /dev/null ; then
+          DOWNLOAD_CMD=$(curl --progress-bar -L "${src}")
+        else
+          DOWNLOAD_CMD=$(wget "${src}" -nv --show-progress -L -O -)
+        fi
+        echo "$DOWNLOAD_CMD" \
+          | sed 's/\r/\n/' \
+          | sed 's/^\s\+//' \
+          | sed 's/^127\.0\.0\.1/0.0.0.0/' \
+          | grep '^0\.0\.0\.0' \
+          | grep -v '\slocalhost\s*' \
+          | sed 's/\s*\#.*//g' \
+          | sed 's/\s\+/\t/g' \
+          >> "${TMPDIR}hosts.downloaded"
     else
         echo "[i] skipping $src"
     fi
