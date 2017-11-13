@@ -92,7 +92,7 @@ https://hosts-file.net/ad_servers.txt
 https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&mimetype=plaintext
 EOF
                 echo "[i] File created."
-                chmod u=rw,g=rw,o=rw "hostssources.lst" # Allows the user to edit the file which is created by root.
+                chmod u=rwx,g=rw,o=rw "hostssources.lst" # Allows the user to edit the file which is created by root.
 
                 # add cronjob
                 read -r -p "[?] Create a cronjob/systemd-service which updates /etc/hosts with new adservers once a week? [systemd/cronjob/N] " REPLY
