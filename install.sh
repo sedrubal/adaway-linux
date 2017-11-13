@@ -28,7 +28,7 @@ case "${1}" in
 
                 # check root
                 if [ "${UID}" != "0" ] ; then
-                  echo "For this action the script must be run as root" 1>&2
+                  echo "[!] For this action the script must be run as root" 1>&2
                   exit 1
                 fi
 
@@ -67,7 +67,7 @@ case "${1}" in
             "YES" | "Yes" | "yes" | "Y" | "y" | "" )
                 # check root
                 if [ "${UID}" != "0" ] ; then
-                  echo "For this action the script must be run as root" 1>&2
+                  echo "[!] For this action the script must be run as root" 1>&2
                   exit 1
                 fi
 
@@ -92,8 +92,8 @@ https://hosts-file.net/ad_servers.txt
 https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&mimetype=plaintext
 EOF
                 echo "[i] File created."
-                chmod 777 "hostssources.lst" # Allows the user to edit the file which is created by root.
-                
+                chmod u=rw,g=rw,o=rw "hostssources.lst" # Allows the user to edit the file which is created by root.
+
                 # add cronjob
                 read -r -p "[?] Create a cronjob/systemd-service which updates /etc/hosts with new adservers once a week? [systemd/cronjob/N] " REPLY
                 case "${REPLY}" in
