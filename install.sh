@@ -4,7 +4,7 @@
 # Remove ads system-wide in Linux                         #
 ###########################################################
 # authors:      sedrubal, diy-electronics                 #
-# version:      v3.0                                      #
+# version:      v4.0                                      #
 # licence:      CC BY-SA 4.0                              #
 # github:       https://github.com/sedrubal/adaway-linux  #
 ###########################################################
@@ -13,7 +13,7 @@
 HOSTS_ORIG="/etc/.hosts.original"
 SCRIPT_DIR="$(cd "$(dirname "${0}")" && pwd)"  # Gets the location of the script
 SRCLST="${SCRIPT_DIR}/hostssources.lst"
-VERSION="3.0"
+VERSION="4.0"
 SYSTEMD_DIR="/etc/systemd/system"
 #
 

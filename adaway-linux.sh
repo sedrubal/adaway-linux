@@ -4,7 +4,7 @@
 # Remove ads system-wide in Linux                           #
 #############################################################
 # authors:  sedrubal, diy-electronics                       #
-# version:  v3.0                                            #
+# version:  v4.0                                            #
 # licence:  CC BY-SA 4.0                                    #
 # github:   https://github.com/sedrubal/adaway-linux        #
 #############################################################
