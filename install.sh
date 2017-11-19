@@ -92,7 +92,8 @@ https://hosts-file.net/ad_servers.txt
 https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&mimetype=plaintext
 EOF
                 echo "[i] File created."
-                chmod u=rwx,g=rw,o=rw "hostssources.lst" # Allows the user to edit the file which is created by root.
+
+                #chmod u=rwx,g=rw,o=rw "${SCRIPT_DIR}/hostssources.lst" # Allows the user to edit the hostssources.lst file which is created by root, uncomment if needed.
 
                 # add cronjob
                 read -r -p "[?] Create a cronjob/systemd-service which updates /etc/hosts with new adservers once a week? [systemd/cronjob/N] " REPLY
@@ -106,7 +107,7 @@ EOF
                         echo "[i] Creating systemd service..."
 
                         # create .service file
-                        sh -c "cat > \"${SYSTEMD_DIR}/adaway-linux.service\" <<EOL
+                        cat > "${SYSTEMD_DIR}/adaway-linux.service" <<EOL
 [Unit]
 Description=Service to run adaway-linux weekly
 Documentation=https://github.com/sedrubal/adaway-linux/
@@ -114,10 +115,10 @@ After=network.target
 
 [Service]
 ExecStart=${SCRIPT_DIR}/adaway-linux.sh
-EOL"
+EOL
 
                         # create .timer file
-                        sh -c "cat > \"${SYSTEMD_DIR}/adaway-linux.timer\" <<EOL
+                        cat > "${SYSTEMD_DIR}/adaway-linux.timer" <<EOL
 [Unit]
 Description=Timer that runs adaway-linux.service weekly
 Documentation=https://github.com/sedrubal/adaway-linux/
@@ -130,7 +131,7 @@ Unit=adaway-linux.service
 
 [Install]
 WantedBy=timers.target
-EOL"
+EOL
                         chmod u=rw,g=r,o=r ${SYSTEMD_DIR}/adaway-linux.*
 
                         # Enable the schedule
