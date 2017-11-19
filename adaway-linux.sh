@@ -36,7 +36,7 @@ if [ "${1}" == "-h" ] || [ "${1}" == "--help" ] ; then
 fi
 
 # check root
-if [ "$(id -u)" != "0" ] && [ "$1" != "-s" ] && [ "$1" != "--simulate" ] ; then
+if [ "${UID}" != "0" ] && [ "$1" != "-s" ] && [ "$1" != "--simulate" ] ; then
     echo "This script must be run as root" 1>&2
     exit 1
 fi
