@@ -43,7 +43,7 @@ case "${1}" in
                 echo "[i] finished"
                 exit 0
                 ;;
-            "NO" | "No" | "no" | "N" | "n" )
+            * )
                 echo "[i] cancelled"
                 exit 1
                 ;;
@@ -122,7 +122,7 @@ EOL"
                         sudo systemctl enable adaway-linux.timer
                         sudo systemctl start adaway-linux.timer && echo "[i] Systemd service succesfully initialized."
                         ;;
-                    "NO" | "No" | "no" | "N" | "n" )
+                    * )
                         echo "[i] No schedule created."
                         ;;
                 esac
@@ -130,7 +130,7 @@ EOL"
                 echo "[i] finished. For uninstall, please run ${0} -u"
                 exit 0
                 ;;
-            "NO" | "No" | "no" | "N" | "n" )
+            * )
                 echo "[i] cancelled"
                 exit 1
                 ;;
