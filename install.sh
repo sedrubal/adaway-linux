@@ -90,6 +90,7 @@ case "${1}" in
 https://adaway.org/hosts.txt
 https://hosts-file.net/ad_servers.txt
 https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&mimetype=plaintext
+https://www.malwaredomainlist.com/hostslist/hosts.txt
 EOF
                 echo "[i] File created."
 
