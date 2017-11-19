@@ -37,10 +37,8 @@ case "${1}" in
 
                   echo "[!] Removing services..."
                   # Unhooking the systemd service
-                  systemctl stop adaway-linux.timer
-                  systemctl stop adaway-linux.service
-                  systemctl disable adaway-linux.timer || echo "[!] adaway-linux.timer is missing. Have you removed it?"
-                  systemctl disable adaway-linux.service || echo "[!] adaway-linux.service is missing. Have you removed it?"
+                  systemctl stop adaway-linux.timer && systemctl disable adaway-linux.timer || echo "[!] adaway-linux.timer is missing. Have you removed it?"
+                  systemctl stop adaway-linux.service && systemctl disable adaway-linux.service || echo "[!] adaway-linux.service is missing. Have you removed it?"
                   rm ${SYSTEMD_DIR}/adaway-linux.*
                 else
                   echo "[i] No systemd service installed. Skipping.."
