@@ -99,7 +99,7 @@ EOF
                 case "${REPLY}" in
                     "cronjob" | "Cronjob" | "CRONJOB" | "CronJob" | "crontab" | "Crontab" | "CRONTAB" | "CronTab" | "cron" | "Cron" | "CRON" | "c" | "C")
                         echo "[i] Creating cronjob..."
-                        line="1 12 */5 * * ${PWD}/adaway-linux.sh"
+                        line="1 12 */5 * * ${SCRIPT_DIR}/adaway-linux.sh"
                         (crontab -u root -l; echo "$line" ) | crontab -u root -
                         ;;
                     "systemd" | "Systemd" | "SYSTEMD" | "sys" | "Sys" | "SYS" | "S" | "s")
