@@ -24,7 +24,7 @@ case "${1}" in
         # uninstall
         read -r -p "[?] Do you really want to uninstall adaway-linux and restore the original /etc/hosts? [Y/n] " REPLY
         case "${REPLY}" in
-            "YES" | "Yes" | "yes" | "Y" | "y" | "" )
+            [Yy][Ee][Ss] | [Yy] | "" ) # YES, Y, NULL
 
                 # check root
                 if [ "${UID}" != "0" ] ; then
@@ -62,7 +62,7 @@ case "${1}" in
         echo "[!] Please run this only ONCE! Cancel, if you already modified /etc/hosts by adaway-linux.sh."
         read -r -p "[?] Proceed? [Y/n] " REPLY
         case "${REPLY}" in
-            "YES" | "Yes" | "yes" | "Y" | "y" | "" )
+            [Yy][Ee][Ss] | [Yy] | "" ) # YES, Y, NULL
                 # check root
                 if [ "${UID}" != "0" ] ; then
                   echo "[!] For this action the script must be run as root" 1>&2
@@ -95,12 +95,12 @@ EOF
                 # add cronjob
                 read -r -p "[?] Create a cronjob/systemd-service which updates /etc/hosts with new adservers once a week? [systemd/cronjob/N] " REPLY
                 case "${REPLY}" in
-                    "cronjob" | "Cronjob" | "CRONJOB" | "CronJob" | "crontab" | "Crontab" | "CRONTAB" | "CronTab" | "cron" | "Cron" | "CRON" | "c" | "C")
+                    [Cc][Rr][Oo][Nn][Jj][Oo][Bb] | [Cr][Rr][Oo][Nn][Tt][Aa][Bb] | [Cc][Rr][Oo][Nn] | [Cc] ) # CRONJOB, CRONTAB, CRON, C
                         echo "[i] Creating cronjob..."
                         line="1 12 */5 * * ${PWD}/adaway-linux.sh"
                         (crontab -u root -l; echo "$line" ) | crontab -u root -
                         ;;
-                    "systemd" | "Systemd" | "SYSTEMD" | "sys" | "Sys" | "SYS" | "S" | "s")
+                    [Ss][Yy][Ss][Tt][Ee][Mm][Dd] | [Ss][Yy][Ss] | [Ss] ) # SYSTEMD, SYS, S
                         echo "[i] Creating systemd service..."
 
                         # create .service file
@@ -132,8 +132,7 @@ EOL
                         chmod u=rw,g=r,o=r ${SYSTEMD_DIR}/adaway-linux.*
 
                         # Enable the schedule
-                        systemctl enable adaway-linux.timer
-                        systemctl start adaway-linux.timer && echo "[i] Systemd service succesfully initialized."
+                        systemctl enable adaway-linux.timer && systemctl start adaway-linux.timer && echo "[i] Systemd service succesfully initialized."
                         ;;
                     * )
                         echo "[i] No schedule created."
@@ -158,9 +157,9 @@ EOL
         # show help
         echo "Usage: ${0} [OPTION]"
         echo ""
-        echo "  -i,  --install    install all things needed by adaway-linux"
-        echo "  -f,  --force      force the installation"
-        echo "  -u,  --uninstall  remove all changes made by this script"
+        echo "  -i,  --install    install all things needed by adaway-linux (requires root)"
+        echo "  -f,  --force      force the installation (requires root)"
+        echo "  -u,  --uninstall  remove all changes made by this script (requires root)"
         echo "  -v,  --version    show current version of this script"
         echo "  -h,  --help       show this help"
         echo ""
