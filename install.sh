@@ -32,10 +32,18 @@ case "${1}" in
                   exit 1
                 fi
 
+                # check if cronjob was installed
+                if [[ $(sudo crontab -u root -l | grep 'adaway-linux.sh') ]] ; then
+                  echo "[i] Removing cronjob..."
+                  crontab -u root -l | grep -v 'adaway-linux.sh' |  crontab -u root - # Gets cronjob but ignores the line with adaway-linux.sh and then reinstalls cronjob
+                else
+                  echo "[i] No cronjob installed. Skipping..."
+                fi
+
                 # check if systemd services are installed
                 if [ -e ${SYSTEMD_DIR}/adaway-linux.timer ] || [ -e ${SYSTEMD_DIR}/adaway-linux.service ] ; then
 
-                  echo "[!] Removing services..."
+                  echo "[!] Removing systemd service..."
                   # Unhooking the systemd service
                   systemctl stop adaway-linux.timer
                   systemctl stop adaway-linux.service
@@ -43,8 +51,7 @@ case "${1}" in
                   systemctl disable adaway-linux.service || echo "[!] adaway-linux.service is missing. Have you removed it?"
                   rm ${SYSTEMD_DIR}/adaway-linux.*
                 else
-                  echo "[i] No systemd service installed. Skipping.."
-                  echo "[!] If you added a cronjob, please remove it yourself."
+                  echo "[i] No systemd service installed. Skipping..."
                 fi
                 echo "[i] Restoring /etc/hosts"
                 mv "${HOSTS_ORIG}" /etc/hosts
