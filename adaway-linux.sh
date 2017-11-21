@@ -82,7 +82,7 @@ while read src; do
 done < "${SCRIPT_DIR}/hostssources.lst"
 
 # checks if any sources where downloaded
-if [ ! -e "${TMPDIR}"/hosts.downloaded ] || [ ! -s "${TMPDIR}"/hosts.downloaded ]; then
+if [ ! -e "${TMPDIR}/hosts.downloaded" ] || [ ! -s "${TMPDIR}/hosts.downloaded" ]; then
   echo "[!] No sources to download from. Exiting..."
   exit 1
 fi
