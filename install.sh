@@ -42,7 +42,7 @@ case "${1}" in
                 fi
 
                 # check if systemd services are installed
-                if [ -e "${SYSTEMD_DIR}"/adaway-linux.timer ] || [ -e "${SYSTEMD_DIR}"/adaway-linux.service ] ; then
+                if [ -e "${SYSTEMD_DIR}/adaway-linux.timer" ] || [ -e "${SYSTEMD_DIR}/adaway-linux.service" ] ; then
 
                   echo "[!] Removing systemd service..."
                   # Unhooking the systemd service
@@ -88,7 +88,7 @@ case "${1}" in
                     # backup /etc/hosts
                     echo "[i] First I will backup the original /etc/hosts to ${HOSTS_ORIG}."
                     # checks if /etc/.hosts.original already exist
-                    if [ -e ${HOSTS_ORIG} ] ; then
+                    if [ -e "${HOSTS_ORIG}" ] ; then
                       echo "[!] Backup of /etc/hosts already exist. To uninstall run: »${0} -u«"
                       exit 1
                     fi
@@ -99,7 +99,7 @@ case "${1}" in
                         exit 1
                     fi
                 else
-                  rm -f ${HOSTS_ORIG}
+                  rm -f "${HOSTS_ORIG}"
                 fi
 
                 # create default hostsources.lst
@@ -150,7 +150,7 @@ Unit=adaway-linux.service
 [Install]
 WantedBy=timers.target
 EOL
-                        chmod u=rw,g=r,o=r "${SYSTEMD_DIR}"/adaway-linux.*
+                        chmod u=rw,g=r,o=r "${SYSTEMD_DIR}/adaway-linux."*
 
                         # Enable the schedule
                         systemctl enable adaway-linux.timer && systemctl start adaway-linux.timer && echo "[i] Systemd service succesfully initialized."
