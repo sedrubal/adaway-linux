@@ -16,7 +16,6 @@ TMPDIR="/tmp/adaway-linux"
 
 SCRIPT_DIR="$(cd "$(dirname "${0}")" && pwd)"  # Gets the location of the script
 
-set -e
 
 # show help
 if [ "${1}" == "-h" ] || [ "${1}" == "--help" ] ; then
@@ -62,10 +61,10 @@ while read src; do
         # - remove additional localhost entries possibly picked up from sources
         # - remove remaining comments
         # - split all entries with one tab
-        if type curl 2>/dev/null > /dev/null ; then
-          DOWNLOAD_CMD=$(curl --progress-bar -L "${src}")
+        if type curl 1>/dev/null 2>&1; then
+          DOWNLOAD_CMD=$(curl --progress-bar -L --connect-timeout 20 --retry 2 "${src}")
         else
-          DOWNLOAD_CMD=$(wget "${src}" -nv --show-progress -L -O -)
+          DOWNLOAD_CMD=$(wget "${src}" -nv --show-progress --read-timeout=20 --timeout=20 -t 2 -L -O -)
         fi
         echo "${DOWNLOAD_CMD}" \
           | sed 's/\r/\n/' \
@@ -83,7 +82,7 @@ done < "${SCRIPT_DIR}/hostssources.lst"
 
 # checks if any sources where downloaded
 if [ ! -e "${TMPDIR}/hosts.downloaded" ] || [ ! -s "${TMPDIR}/hosts.downloaded" ]; then
-  echo "[!] No sources to download from. Exiting..."
+  echo "[!] No data obtained. Exiting..." 1>&2
   exit 1
 fi
 

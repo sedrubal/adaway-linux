@@ -46,15 +46,15 @@ case "${1}" in
 
                   echo "[!] Removing systemd service..."
                   # Unhooking the systemd service
-                  systemctl stop adaway-linux.timer && systemctl disable adaway-linux.timer || echo "[!] adaway-linux.timer is missing. Have you removed it?"
-                  systemctl stop adaway-linux.service && systemctl disable adaway-linux.service || echo "[!] adaway-linux.service is missing. Have you removed it?"
+                  systemctl stop adaway-linux.timer && systemctl disable adaway-linux.timer || echo "[!] adaway-linux.timer is missing. Have you removed it?" 1>&2
+                  systemctl stop adaway-linux.service && systemctl disable adaway-linux.service || echo "[!] adaway-linux.service is missing. Have you removed it?" 1>&2
                   rm "${SYSTEMD_DIR}/adaway-linux."*
                 else
                   echo "[i] No systemd service installed. Skipping..."
                 fi
                 # Checks if /etc/.hosts.orginal exist
                 if [ ! -e "${HOSTS_ORIG}" ] ; then
-                  echo "[!] Backup of /etc/hosts does not exist. To install run: »${0} -i« or restore it manually."
+                  echo "[!] Backup of /etc/hosts does not exist. To install run: »${0} -i« or restore it manually." 1>&2
                   exit 1
                 else
                   echo "[i] Restoring /etc/hosts"
@@ -64,7 +64,7 @@ case "${1}" in
                 exit 0
                 ;;
             * )
-                echo "[i] Uninstallation cancelled."
+                echo "[i] Uninstallation cancelled." 1>&2
                 exit 1
                 ;;
         esac
@@ -89,17 +89,17 @@ case "${1}" in
                     echo "[i] First I will backup the original /etc/hosts to ${HOSTS_ORIG}."
                     # checks if /etc/.hosts.original already exist
                     if [ -e "${HOSTS_ORIG}" ] ; then
-                      echo "[!] Backup of /etc/hosts already exist. To uninstall run: »${0} -u«"
+                      echo "[!] Backup of /etc/hosts already exist. To uninstall run: »${0} -u«" 1>&2
                       exit 1
                     fi
                     cp /etc/hosts "${HOSTS_ORIG}"
                     # check if backup was succesfully
                     if [ ! -e "${HOSTS_ORIG}" ] ; then
-                        echo "[!] Backup of /etc/hosts failed. Please backup this file manually and bypass this check by using the -f parameter."
+                        echo "[!] Backup of /etc/hosts failed. Please backup this file manually and bypass this check by using the -f parameter." 1>&2
                         exit 1
                     fi
                 else
-                  rm -f "${HOSTS_ORIG}"
+                  rm -f "${HOSTS_ORIG}" 1>/dev/null 2>&1
                 fi
 
                 # create default hostsources.lst
@@ -156,7 +156,7 @@ EOL
                         systemctl enable adaway-linux.timer && systemctl start adaway-linux.timer && echo "[i] Systemd service succesfully initialized."
                         ;;
                     * )
-                        echo "[i] No schedule created."
+                        echo "[i] No schedule created." 1>&2
                         ;;
                 esac
 
@@ -164,7 +164,7 @@ EOL
                 exit 0
                 ;;
             * )
-                echo "[i] Installation cancelled."
+                echo "[i] Installation cancelled." 1>&2
                 exit 1
                 ;;
         esac
@@ -186,9 +186,10 @@ EOL
         echo ""
         echo "Please report bugs at https://github.com/sedrubal/adaway-linux/issues"
         #
-        exit 1
+        exit 0
         ;;
     * )
-        echo "${0}: unknown option ${1}"
+        echo "${0}: unknown option ${1}" 1>&2
         echo "Run »${0} -h« or »${0} --help« to get further information."
+        exit 1
 esac
