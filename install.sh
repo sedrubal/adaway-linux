@@ -22,15 +22,16 @@ set -e
 case "${1}" in
     "-u" | "--uninstall" )
         # uninstall
+
+        # check root
+        if [ "${UID}" != "0" ] ; then
+          echo "[!] For this action the script must be run as root." 1>&2
+          exit 1
+        fi
+
         read -r -p "[?] Do you really want to uninstall adaway-linux and restore the original /etc/hosts? [Y/n] " REPLY
         case "${REPLY}" in
             [Yy][Ee][Ss] | [Yy] | "" ) # YES, Y, NULL
-
-                # check root
-                if [ "${UID}" != "0" ] ; then
-                  echo "[!] For this action the script must be run as root" 1>&2
-                  exit 1
-                fi
 
                 # check if cronjob was installed
                 if [[ $(sudo crontab -u root -l | grep 'adaway-linux.sh') ]] ; then
@@ -41,23 +42,29 @@ case "${1}" in
                 fi
 
                 # check if systemd services are installed
-                if [ -e ${SYSTEMD_DIR}/adaway-linux.timer ] || [ -e ${SYSTEMD_DIR}/adaway-linux.service ] ; then
+                if [ -e "${SYSTEMD_DIR}/adaway-linux.timer" ] || [ -e "${SYSTEMD_DIR}/adaway-linux.service" ] ; then
 
                   echo "[!] Removing systemd service..."
                   # Unhooking the systemd service
                   systemctl stop adaway-linux.timer && systemctl disable adaway-linux.timer || echo "[!] adaway-linux.timer is missing. Have you removed it?"
                   systemctl stop adaway-linux.service && systemctl disable adaway-linux.service || echo "[!] adaway-linux.service is missing. Have you removed it?"
-                  rm ${SYSTEMD_DIR}/adaway-linux.*
+                  rm "${SYSTEMD_DIR}/adaway-linux."*
                 else
                   echo "[i] No systemd service installed. Skipping..."
                 fi
-                echo "[i] Restoring /etc/hosts"
-                mv "${HOSTS_ORIG}" /etc/hosts
-                echo "[i] finished"
+                # Checks if /etc/.hosts.orginal exist
+                if [ ! -e "${HOSTS_ORIG}" ] ; then
+                  echo "[!] Backup of /etc/hosts does not exist. To install run: »${0} -i« or restore it manually."
+                  exit 1
+                else
+                  echo "[i] Restoring /etc/hosts"
+                  mv "${HOSTS_ORIG}" /etc/hosts
+                fi
+                echo "[i] Finished."
                 exit 0
                 ;;
             * )
-                echo "[i] cancelled"
+                echo "[i] Uninstallation cancelled."
                 exit 1
                 ;;
         esac
@@ -66,26 +73,33 @@ case "${1}" in
         # install
         "-i" | "--install" )
         echo "Welcome to the install-script for adaway-linux."
+        # check root
+        if [ "${UID}" != "0" ] ; then
+          echo "[!] For this action the script must be run as root." 1>&2
+          exit 1
+        fi
         echo "[!] Please run this only ONCE! Cancel, if you already modified /etc/hosts by adaway-linux.sh."
         read -r -p "[?] Proceed? [Y/n] " REPLY
         case "${REPLY}" in
             [Yy][Ee][Ss] | [Yy] | "" ) # YES, Y, NULL
-                # check root
-                if [ "${UID}" != "0" ] ; then
-                  echo "[!] For this action the script must be run as root" 1>&2
-                  exit 1
-                fi
 
                 # check if script wasn't started with the -f option
-                if [ "$2" != "-f" ] && [ "$ARG1" != "--force" ] ; then
+                if [ "${2}" != "-f" ] && [ "${2}" != "--force" ] ; then
                     # backup /etc/hosts
                     echo "[i] First I will backup the original /etc/hosts to ${HOSTS_ORIG}."
+                    # checks if /etc/.hosts.original already exist
+                    if [ -e "${HOSTS_ORIG}" ] ; then
+                      echo "[!] Backup of /etc/hosts already exist. To uninstall run: »${0} -u«"
+                      exit 1
+                    fi
                     cp /etc/hosts "${HOSTS_ORIG}"
                     # check if backup was succesfully
                     if [ ! -e "${HOSTS_ORIG}" ] ; then
                         echo "[!] Backup of /etc/hosts failed. Please backup this file manually and bypass this check by using the -f parameter."
                         exit 1
                     fi
+                else
+                  rm -f "${HOSTS_ORIG}"
                 fi
 
                 # create default hostsources.lst
@@ -105,7 +119,7 @@ EOF
                     [Cc][Rr][Oo][Nn][Jj][Oo][Bb] | [Cr][Rr][Oo][Nn][Tt][Aa][Bb] | [Cc][Rr][Oo][Nn] | [Cc] ) # CRONJOB, CRONTAB, CRON, C
                         echo "[i] Creating cronjob..."
                         line="1 12 */5 * * ${SCRIPT_DIR}/adaway-linux.sh"
-                        (crontab -u root -l; echo "$line" ) | crontab -u root -
+                        (crontab -u root -l; echo "${line}" ) | crontab -u root -
                         ;;
                     [Ss][Yy][Ss][Tt][Ee][Mm][Dd] | [Ss][Yy][Ss] | [Ss] ) # SYSTEMD, SYS, S
                         echo "[i] Creating systemd service..."
@@ -136,7 +150,7 @@ Unit=adaway-linux.service
 [Install]
 WantedBy=timers.target
 EOL
-                        chmod u=rw,g=r,o=r ${SYSTEMD_DIR}/adaway-linux.*
+                        chmod u=rw,g=r,o=r "${SYSTEMD_DIR}/adaway-linux."*
 
                         # Enable the schedule
                         systemctl enable adaway-linux.timer && systemctl start adaway-linux.timer && echo "[i] Systemd service succesfully initialized."
@@ -146,11 +160,11 @@ EOL
                         ;;
                 esac
 
-                echo "[i] finished. For uninstall, please run ${0} -u"
+                echo "[i] Finished. For uninstall, please run »${0} -u«"
                 exit 0
                 ;;
             * )
-                echo "[i] cancelled"
+                echo "[i] Installation cancelled."
                 exit 1
                 ;;
         esac

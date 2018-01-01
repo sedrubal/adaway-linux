@@ -11,7 +11,7 @@
 
 # settings
 HOSTSORIG="/etc/.hosts.original"
-TMPDIR="/tmp/adaway-linux/"
+TMPDIR="/tmp/adaway-linux"
 #
 
 SCRIPT_DIR="$(cd "$(dirname "${0}")" && pwd)"  # Gets the location of the script
@@ -36,8 +36,8 @@ if [ "${1}" == "-h" ] || [ "${1}" == "--help" ] ; then
 fi
 
 # check root
-if [ "${UID}" != "0" ] && [ "$1" != "-s" ] && [ "$1" != "--simulate" ] ; then
-    echo "This script must be run as root" 1>&2
+if [ "${UID}" != "0" ] && [ "${1}" != "-s" ] && [ "${1}" != "--simulate" ] ; then
+    echo "This script must be run as root." 1>&2
     exit 1
 fi
 
@@ -52,7 +52,7 @@ mkdir -p "${TMPDIR}"
 
 # add domains from hosts-server listet in hostssources.lst
 while read src; do
-    if [[ "${src}" != "#*" ]] ; then
+    if [[ "${src}" != "#"* ]] ; then
         echo "[i] Downloading and cleaning up ${src}"
         # download and cleanup:
         # - replace \r\n to unix \n
@@ -67,7 +67,7 @@ while read src; do
         else
           DOWNLOAD_CMD=$(wget "${src}" -nv --show-progress -L -O -)
         fi
-        echo "$DOWNLOAD_CMD" \
+        echo "${DOWNLOAD_CMD}" \
           | sed 's/\r/\n/' \
           | sed 's/^\s\+//' \
           | sed 's/^127\.0\.0\.1/0.0.0.0/' \
@@ -75,41 +75,47 @@ while read src; do
           | grep -v '\slocalhost\s*' \
           | sed 's/\s*\#.*//g' \
           | sed 's/\s\+/\t/g' \
-          >> "${TMPDIR}hosts.downloaded"
+          >> "${TMPDIR}/hosts.downloaded"
     else
-        echo "[i] skipping $src"
+        echo "[i] Skipping ${src}"
     fi
 done < "${SCRIPT_DIR}/hostssources.lst"
 
-uniq <(sort "${TMPDIR}hosts.downloaded") > "${TMPDIR}hosts.adservers"
+# checks if any sources where downloaded
+if [ ! -e "${TMPDIR}/hosts.downloaded" ] || [ ! -s "${TMPDIR}/hosts.downloaded" ]; then
+  echo "[!] No sources to download from. Exiting..."
+  exit 1
+fi
+
+uniq <(sort "${TMPDIR}/hosts.downloaded") > "${TMPDIR}/hosts.adservers"
 
 # fists lines of /etc/hosts
 echo "[i] Adding original hosts file from ${HOSTSORIG}"
-cat << EOF > "${TMPDIR}hosts.header"
+cat >> "${TMPDIR}/hosts.header" <<EOF
 # [!] This file will be updated by the ad-block-script called adaway-linux.
 # [!] If you want to edit /etc/hosts, please edit the original file in ${HOSTSORIG}.
 # [!] Content from there will be added to the top of this file.
 
 EOF
-cat "${HOSTSORIG}" >> "${TMPDIR}hosts.header"
-cat << EOF >> "${TMPDIR}hosts.header"
+cat "${HOSTSORIG}" >> "${TMPDIR}/hosts.header"
+cat >> "${TMPDIR}/hosts.header" <<EOF
 
-# Ad Servers:
+# Ad Servers: added with ${SCRIPT_DIR}/adaway-linux.sh
 
 EOF
-cat "${TMPDIR}hosts.header" "${TMPDIR}hosts.adservers" > "${TMPDIR}hosts"
+cat "${TMPDIR}/hosts.header" "${TMPDIR}/hosts.adservers" > "${TMPDIR}/hosts"
 
 # replacing /etc/hosts
-if [ "$1" != "-s" ] && [ "$1" != "--simulate" ] ; then
+if [ "${1}" != "-s" ] && [ "${1}" != "--simulate" ] ; then
 
     echo "[i] Moving new hosts file to /etc/hosts"
-    mv "${TMPDIR}hosts" /etc/hosts
+    mv "${TMPDIR}/hosts" /etc/hosts
 
-    echo "[i] Deleting directory ${TMPDIR}"
+    echo "[i] Deleting directory ${TMPDIR}/"
     rm -r "${TMPDIR}"
 
 else
-    echo "[i] Skipping replacing /etc/hosts. You can see the hosts file there: ${TMPDIR}hosts"
+    echo "[i] Skipping replacing /etc/hosts. You can see the hosts file there: ${TMPDIR}/hosts"
 fi
 
 echo "[i] Finished"
