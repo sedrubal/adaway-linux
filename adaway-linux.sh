@@ -10,12 +10,13 @@
 #############################################################
 
 # settings
-HOSTSORIG="/etc/.hosts.original"
-TMPDIR="/tmp/adaway-linux"
+readonly HOSTSORIG="/etc/.hosts.original"
+readonly TMPDIR="/tmp/adaway-linux"
 #
 
-SCRIPT_DIR="$(cd "$(dirname "${0}")" && pwd)"  # Gets the location of the script
+readonly SCRIPT_DIR="$(cd "$(dirname "${0}")" && pwd)"  # Gets the location of the script
 
+set -e
 
 # show help
 if [ "${1}" == "-h" ] || [ "${1}" == "--help" ] ; then
@@ -51,8 +52,19 @@ mkdir -p "${TMPDIR}"
 
 # add domains from hosts-server listet in hostssources.lst
 while read src; do
+    timeout=20
+    retries=2
     if [[ "${src}" != "#"* ]] ; then
         echo "[i] Downloading and cleaning up ${src}"
+        set +e
+
+        if type curl 1>/dev/null 2>&1; then
+          DOWNLOAD_CMD=$(curl --progress-bar -L --connect-timeout ${timeout} --retry ${retries} "${src}")
+        else
+          DOWNLOAD_CMD=$(wget "${src}" -nv --show-progress --read-timeout=${timeout} --timeout=${timeout} -t ${retries} -L -O - )
+        fi
+
+        set -e
         # download and cleanup:
         # - replace \r\n to unix \n
         # - remove leading whitespaces
@@ -61,11 +73,6 @@ while read src; do
         # - remove additional localhost entries possibly picked up from sources
         # - remove remaining comments
         # - split all entries with one tab
-        if type curl 1>/dev/null 2>&1; then
-          DOWNLOAD_CMD=$(curl --progress-bar -L --connect-timeout 20 --retry 2 "${src}")
-        else
-          DOWNLOAD_CMD=$(wget "${src}" -nv --show-progress --read-timeout=20 --timeout=20 -t 2 -L -O -)
-        fi
         echo "${DOWNLOAD_CMD}" \
           | sed 's/\r/\n/' \
           | sed 's/^\s\+//' \
@@ -79,6 +86,9 @@ while read src; do
         echo "[i] Skipping ${src}"
     fi
 done < "${SCRIPT_DIR}/hostssources.lst"
+
+unset timeout
+unset retries
 
 # checks if any sources where downloaded
 if [ ! -e "${TMPDIR}/hosts.downloaded" ] || [ ! -s "${TMPDIR}/hosts.downloaded" ]; then

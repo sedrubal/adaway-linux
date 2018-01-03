@@ -10,11 +10,11 @@
 ###########################################################
 
 # settings
-HOSTS_ORIG="/etc/.hosts.original"
-SCRIPT_DIR="$(cd "$(dirname "${0}")" && pwd)"  # Gets the location of the script
-SRCLST="${SCRIPT_DIR}/hostssources.lst"
-VERSION="4.0"
-SYSTEMD_DIR="/etc/systemd/system"
+readonly HOSTS_ORIG="/etc/.hosts.original"
+readonly SCRIPT_DIR="$(cd "$(dirname "${0}")" && pwd)"  # Gets the location of the script
+readonly SRCLST="${SCRIPT_DIR}/hostssources.lst"
+readonly VERSION="4.0"
+readonly SYSTEMD_DIR="/etc/systemd/system"
 #
 
 set -e
