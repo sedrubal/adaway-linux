@@ -10,11 +10,13 @@
 #############################################################
 
 # settings
-HOSTSORIG="/etc/.hosts.original"
-TMPDIR="/tmp/adaway-linux"
+readonly HOSTSORIG="/etc/.hosts.original"
+readonly TMPDIR="/tmp/adaway-linux"
+readonly DL_TIMEOUT="20"
+readonly DL_RETRIES="2"
 #
 
-SCRIPT_DIR="$(cd "$(dirname "${0}")" && pwd)"  # Gets the location of the script
+readonly SCRIPT_DIR="$(cd "$(dirname "${0}")" && pwd)"  # Gets the location of the script
 
 set -e
 
@@ -54,6 +56,15 @@ mkdir -p "${TMPDIR}"
 while read src; do
     if [[ "${src}" != "#"* ]] ; then
         echo "[i] Downloading and cleaning up ${src}"
+        set +e
+
+        if type curl 1>/dev/null 2>&1; then
+          DOWNLOAD_CMD=$(curl --progress-bar -L --connect-timeout ${DL_TIMEOUT} --retry ${DL_RETRIES} "${src}")
+        else
+          DOWNLOAD_CMD=$(wget "${src}" -nv --show-progress --read-timeout=${DL_TIMEOUT} --timeout=${DL_TIMEOUT} -t ${DL_RETRIES} -L -O - )
+        fi
+
+        set -e
         # download and cleanup:
         # - replace \r\n to unix \n
         # - remove leading whitespaces
@@ -62,11 +73,6 @@ while read src; do
         # - remove additional localhost entries possibly picked up from sources
         # - remove remaining comments
         # - split all entries with one tab
-        if type curl 2>/dev/null > /dev/null ; then
-          DOWNLOAD_CMD=$(curl --progress-bar -L "${src}")
-        else
-          DOWNLOAD_CMD=$(wget "${src}" -nv --show-progress -L -O -)
-        fi
         echo "${DOWNLOAD_CMD}" \
           | sed 's/\r/\n/' \
           | sed 's/^\s\+//' \
@@ -83,7 +89,7 @@ done < "${SCRIPT_DIR}/hostssources.lst"
 
 # checks if any sources where downloaded
 if [ ! -e "${TMPDIR}/hosts.downloaded" ] || [ ! -s "${TMPDIR}/hosts.downloaded" ]; then
-  echo "[!] No sources to download from. Exiting..."
+  echo "[!] No data obtained. Exiting..." 1>&2
   exit 1
 fi
 
