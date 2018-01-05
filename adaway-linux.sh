@@ -12,6 +12,8 @@
 # settings
 readonly HOSTSORIG="/etc/.hosts.original"
 readonly TMPDIR="/tmp/adaway-linux"
+readonly DL_TIMEOUT="20"
+readonly DL_RETRIES="2"
 #
 
 readonly SCRIPT_DIR="$(cd "$(dirname "${0}")" && pwd)"  # Gets the location of the script
@@ -52,16 +54,14 @@ mkdir -p "${TMPDIR}"
 
 # add domains from hosts-server listet in hostssources.lst
 while read src; do
-    timeout=20
-    retries=2
     if [[ "${src}" != "#"* ]] ; then
         echo "[i] Downloading and cleaning up ${src}"
         set +e
 
         if type curl 1>/dev/null 2>&1; then
-          DOWNLOAD_CMD=$(curl --progress-bar -L --connect-timeout ${timeout} --retry ${retries} "${src}")
+          DOWNLOAD_CMD=$(curl --progress-bar -L --connect-timeout ${DL_TIMEOUT} --retry ${DL_RETRIES} "${src}")
         else
-          DOWNLOAD_CMD=$(wget "${src}" -nv --show-progress --read-timeout=${timeout} --timeout=${timeout} -t ${retries} -L -O - )
+          DOWNLOAD_CMD=$(wget "${src}" -nv --show-progress --read-timeout=${DL_TIMEOUT} --timeout=${DL_TIMEOUT} -t ${DL_RETRIES} -L -O - )
         fi
 
         set -e
@@ -86,9 +86,6 @@ while read src; do
         echo "[i] Skipping ${src}"
     fi
 done < "${SCRIPT_DIR}/hostssources.lst"
-
-unset timeout
-unset retries
 
 # checks if any sources where downloaded
 if [ ! -e "${TMPDIR}/hosts.downloaded" ] || [ ! -s "${TMPDIR}/hosts.downloaded" ]; then
