@@ -15,6 +15,7 @@ readonly SCRIPT_DIR="$(cd "$(dirname "${0}")" && pwd)"  # Gets the location of t
 readonly SRCLST="${SCRIPT_DIR}/hostssources.lst"
 readonly VERSION="4.0"
 readonly SYSTEMD_DIR="/etc/systemd/system"
+readonly CRONJOB_FILE="/etc/cron.d/adaway"
 #
 
 set -e
@@ -34,9 +35,9 @@ case "${1}" in
             [Yy][Ee][Ss] | [Yy] | "" ) # YES, Y, NULL
 
                 # check if cronjob was installed
-                if [[ $(sudo crontab -u root -l | grep 'adaway-linux.sh') ]] ; then
+                if [ -f ${CRONJOB_FILE} ] ; then
                   echo "[i] Removing cronjob..."
-                  crontab -u root -l | grep -v 'adaway-linux.sh' |  crontab -u root - # Gets cronjob but ignores the line with adaway-linux.sh and then reinstalls cronjob
+                  rm ${CRONJOB_FILE}
                 else
                   echo "[i] No cronjob installed. Skipping..."
                 fi
@@ -118,8 +119,13 @@ EOF
                 case "${REPLY}" in
                     [Cc][Rr][Oo][Nn][Jj][Oo][Bb] | [Cr][Rr][Oo][Nn][Tt][Aa][Bb] | [Cc][Rr][Oo][Nn] | [Cc] ) # CRONJOB, CRONTAB, CRON, C
                         echo "[i] Creating cronjob..."
-                        line="1 12 */5 * * ${SCRIPT_DIR}/adaway-linux.sh"
-                        (crontab -u root -l; echo "${line}" ) | crontab -u root -
+                        line="1 12 */5 * * root ${SCRIPT_DIR}/adaway-linux.sh"
+                        echo "${line}" > ${CRONJOB_FILE}
+                        # make sure permissions are right
+                        chmod u=rw,g=r,o=r ${CRONJOB_FILE}
+                        chown root:root ${CRONJOB_FILE}
+                        # restart the cron service
+                        service cron restart 
                         ;;
                     [Ss][Yy][Ss][Tt][Ee][Mm][Dd] | [Ss][Yy][Ss] | [Ss] ) # SYSTEMD, SYS, S
                         echo "[i] Creating systemd service..."
