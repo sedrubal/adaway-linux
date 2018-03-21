@@ -115,11 +115,27 @@ EOF
                 echo "[i] File created."
 
                 # add cronjob
-                read -r -p "[?] Create a cronjob/systemd-service which updates /etc/hosts with new adservers once a week? [systemd/cronjob/N] " REPLY
+                read -r -p "[?] Create a cronjob/systemd-service which updates /etc/hosts with new adservers? [systemd/cronjob/N] " REPLY
                 case "${REPLY}" in
                     [Cc][Rr][Oo][Nn][Jj][Oo][Bb] | [Cr][Rr][Oo][Nn][Tt][Aa][Bb] | [Cc][Rr][Oo][Nn] | [Cc] ) # CRONJOB, CRONTAB, CRON, C
-                        echo "[i] Creating cronjob..."
+                        read -r -p "[?] How often should the cronjob run? [weekly/DAILY/hourly/reboot] " FREQUENCY
+                        # set daily as default
                         line="1 12 */5 * * root ${SCRIPT_DIR}/adaway-linux.sh"
+                        # check input
+                        case "${FREQUENCY}" in 
+                            [Ww][Ee][Ee][Kk][Ll][Yy] | [Ww] )
+                                line="1 12 */5 * * root ${SCRIPT_DIR}/adaway-linux.sh"
+                                ;;
+                            [Hh][Oo][Uu][Rr][Ll][Yy] | [Hh] )
+                                line="1 * * * * root ${SCRIPT_DIR}/adaway-linux.sh"
+                                ;;
+                            [Rr][Ee][Bb][Oo][Oo][Tt] | [Rr] )
+                                line="@reboot root ${SCRIPT_DIR}/adaway-linux.sh"
+                                echo "[i] Keep in mind that you need a working internet connection on every startup for this option."
+                                echo "    This may be the case when you are on wire but often isn't the case when you are using wireless networks."
+                                ;;
+                        esac
+                        echo "[i] Creating cronjob..."
                         echo "${line}" > ${CRONJOB_FILE}
                         # make sure permissions are right
                         chmod u=rw,g=r,o=r ${CRONJOB_FILE}
@@ -128,12 +144,24 @@ EOF
                         service cron restart 
                         ;;
                     [Ss][Yy][Ss][Tt][Ee][Mm][Dd] | [Ss][Yy][Ss] | [Ss] ) # SYSTEMD, SYS, S
+                        read -r -p "[?] How often should the service run? [weekly/DAILY/hourly] " FREQUENCY
+                        # set daily as default
+                        freq="daily"
+                        # check input
+                        case "${FREQUENCY}" in
+                            [Ww][Ee][Ee][Kk][Ll][Yy] | [Ww] )
+                                freq="weekly"
+                                ;;
+                            [Hh][Oo][Uu][Rr][Ll][Yy] | [Hh] )
+                                freq="hourly"
+                                ;;
+                        esac
                         echo "[i] Creating systemd service..."
 
                         # create .service file
                         cat > "${SYSTEMD_DIR}/adaway-linux.service" <<EOL
 [Unit]
-Description=Service to run adaway-linux weekly
+Description=Service to run adaway-linux ${freq}
 Documentation=https://github.com/sedrubal/adaway-linux/
 After=network.target
 
@@ -144,12 +172,12 @@ EOL
                         # create .timer file
                         cat > "${SYSTEMD_DIR}/adaway-linux.timer" <<EOL
 [Unit]
-Description=Timer that runs adaway-linux.service weekly
+Description=Timer that runs adaway-linux.service ${freq}
 Documentation=https://github.com/sedrubal/adaway-linux/
 After=network.target
 
 [Timer]
-OnCalendar=weekly
+OnCalendar=${freq}
 Persistent=true
 Unit=adaway-linux.service
 
