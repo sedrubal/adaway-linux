@@ -18,6 +18,19 @@ readonly SYSTEMD_DIR="/etc/systemd/system"
 readonly CRONJOB_FILE="/etc/cron.d/adaway"
 #
 
+# helper functions
+# restart service if running
+restart_service(){
+    #check if service is running 
+    if sudo service --status-all 2>&1 | grep -q '\[ + \]  ${1}$'; then
+        echo "[i] Service ${1} is currently running. Restarting it to load changes."
+        sudo service ${1} restart
+    else
+        echo "[i] Service ${1} not installed or not runnning. Skipping..."
+    fi
+}
+#
+
 set -e
 
 case "${1}" in
@@ -120,28 +133,29 @@ EOF
                     [Cc][Rr][Oo][Nn][Jj][Oo][Bb] | [Cr][Rr][Oo][Nn][Tt][Aa][Bb] | [Cc][Rr][Oo][Nn] | [Cc] ) # CRONJOB, CRONTAB, CRON, C
                         read -r -p "[?] How often should the cronjob run? [weekly/DAILY/hourly/reboot] " FREQUENCY
                         # set daily as default
-                        line="1 12 * * * root ${SCRIPT_DIR}/adaway-linux.sh"
+                        freq="1 12 * * *"
                         # check input
                         case "${FREQUENCY}" in 
                             [Ww][Ee][Ee][Kk][Ll][Yy] | [Ww] )
-                                line="1 12 */5 * * root ${SCRIPT_DIR}/adaway-linux.sh"
+                                freq="1 12 */5 * *"
                                 ;;
                             [Hh][Oo][Uu][Rr][Ll][Yy] | [Hh] )
-                                line="1 * * * * root ${SCRIPT_DIR}/adaway-linux.sh"
+                                freq="1 * * * *"
                                 ;;
                             [Rr][Ee][Bb][Oo][Oo][Tt] | [Rr] )
-                                line="@reboot root ${SCRIPT_DIR}/adaway-linux.sh"
+                                freq="@reboot"
                                 echo "[i] Keep in mind that you need a working internet connection on every startup for this option."
                                 echo "    This may be the case when you are on wire but often isn't the case when you are using wireless networks."
                                 ;;
                         esac
                         echo "[i] Creating cronjob..."
-                        echo "${line}" > ${CRONJOB_FILE}
+                        echo "${freq} root ${SCRIPT_DIR}/adaway-linux.sh" > ${CRONJOB_FILE}
                         # make sure permissions are right
                         chmod u=rw,g=r,o=r ${CRONJOB_FILE}
                         chown root:root ${CRONJOB_FILE}
                         # restart the cron service
-                        service cron restart 
+                        restart_service cron
+                        restart_service crond
                         ;;
                     [Ss][Yy][Ss][Tt][Ee][Mm][Dd] | [Ss][Yy][Ss] | [Ss] ) # SYSTEMD, SYS, S
                         read -r -p "[?] How often should the service run? [weekly/DAILY/hourly] " FREQUENCY
