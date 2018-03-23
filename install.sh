@@ -120,7 +120,7 @@ EOF
                     [Cc][Rr][Oo][Nn][Jj][Oo][Bb] | [Cr][Rr][Oo][Nn][Tt][Aa][Bb] | [Cc][Rr][Oo][Nn] | [Cc] ) # CRONJOB, CRONTAB, CRON, C
                         read -r -p "[?] How often should the cronjob run? [weekly/DAILY/hourly/reboot] " FREQUENCY
                         # set daily as default
-                        line="1 12 */5 * * root ${SCRIPT_DIR}/adaway-linux.sh"
+                        line="1 12 * * * root ${SCRIPT_DIR}/adaway-linux.sh"
                         # check input
                         case "${FREQUENCY}" in 
                             [Ww][Ee][Ee][Kk][Ll][Yy] | [Ww] )
