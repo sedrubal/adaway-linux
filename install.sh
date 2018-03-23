@@ -22,8 +22,9 @@ readonly CRONJOB_FILE="/etc/cron.d/adaway"
 # restart service if running
 restart_service(){
     #check if service is running 
-    if sudo service --status-all 2>&1 | grep -q '\[ + \]  ${1}$'; then
-        echo "[i] Service ${1} is currently running. Restarting it to load changes."
+    if sudo service ${1} status | grep -Fq "active (running)"
+    then
+        echo "[i] Service ${1} is currently running. Restarting it now."
         sudo service ${1} restart
     else
         echo "[i] Service ${1} not installed or not runnning. Skipping..."
