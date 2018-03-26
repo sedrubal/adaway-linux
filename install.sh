@@ -18,20 +18,6 @@ readonly SYSTEMD_DIR="/etc/systemd/system"
 readonly CRONJOB_FILE="/etc/cron.d/adaway"
 #
 
-# helper functions
-# restart service if running
-restart_service(){
-    #check if service is running 
-    if sudo service ${1} status | grep -Fq "active (running)"
-    then
-        echo "[i] Service ${1} is currently running. Restarting it now."
-        sudo service ${1} restart
-    else
-        echo "[i] Service ${1} not installed or not runnning. Skipping..."
-    fi
-}
-#
-
 set -e
 
 case "${1}" in
@@ -154,9 +140,6 @@ EOF
                         # make sure permissions are right
                         chmod u=rw,g=r,o=r ${CRONJOB_FILE}
                         chown root:root ${CRONJOB_FILE}
-                        # restart the cron service
-                        restart_service cron
-                        restart_service crond
                         ;;
                     [Ss][Yy][Ss][Tt][Ee][Mm][Dd] | [Ss][Yy][Ss] | [Ss] ) # SYSTEMD, SYS, S
                         read -r -p "[?] How often should the service run? [weekly/DAILY/hourly] " FREQUENCY
