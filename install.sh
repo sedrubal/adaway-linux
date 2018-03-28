@@ -159,7 +159,7 @@ EOF
                         # create .service file
                         cat > "${SYSTEMD_DIR}/adaway-linux.service" <<EOL
 [Unit]
-Description=Service to run adaway-linux "${freq}"
+Description=Service to run adaway-linux ${freq}
 Documentation=https://github.com/sedrubal/adaway-linux/
 After=network.target
 
@@ -170,12 +170,12 @@ EOL
                         # create .timer file
                         cat > "${SYSTEMD_DIR}/adaway-linux.timer" <<EOL
 [Unit]
-Description=Timer that runs adaway-linux.service "${freq}"
+Description=Timer that runs adaway-linux.service ${freq}
 Documentation=https://github.com/sedrubal/adaway-linux/
 After=network.target
 
 [Timer]
-OnCalendar="${freq}"
+OnCalendar=${freq}
 Persistent=true
 Unit=adaway-linux.service
 
