@@ -35,9 +35,9 @@ case "${1}" in
             [Yy][Ee][Ss] | [Yy] | "" ) # YES, Y, NULL
 
                 # check if cronjob was installed
-                if [ -f ${CRONJOB_FILE} ] ; then
+                if [ -f "${CRONJOB_FILE}" ] ; then
                   echo "[i] Removing cronjob..."
-                  rm ${CRONJOB_FILE}
+                  rm "${CRONJOB_FILE}"
                 else
                   echo "[i] No cronjob installed. Skipping..."
                 fi
@@ -136,10 +136,10 @@ EOF
                                 ;;
                         esac
                         echo "[i] Creating cronjob..."
-                        echo "${freq} root ${SCRIPT_DIR}/adaway-linux.sh" > ${CRONJOB_FILE}
+                        echo "${freq} root ${SCRIPT_DIR}/adaway-linux.sh" > "${CRONJOB_FILE}"
                         # make sure permissions are right
-                        chmod u=rw,g=r,o=r ${CRONJOB_FILE}
-                        chown root:root ${CRONJOB_FILE}
+                        chmod u=rw,g=r,o=r "${CRONJOB_FILE}"
+                        chown root:root "${CRONJOB_FILE}"
                         ;;
                     [Ss][Yy][Ss][Tt][Ee][Mm][Dd] | [Ss][Yy][Ss] | [Ss] ) # SYSTEMD, SYS, S
                         read -r -p "[?] How often should the service run? [weekly/DAILY/hourly] " FREQUENCY
@@ -159,7 +159,7 @@ EOF
                         # create .service file
                         cat > "${SYSTEMD_DIR}/adaway-linux.service" <<EOL
 [Unit]
-Description=Service to run adaway-linux ${freq}
+Description=Service to run adaway-linux "${freq}"
 Documentation=https://github.com/sedrubal/adaway-linux/
 After=network.target
 
@@ -170,12 +170,12 @@ EOL
                         # create .timer file
                         cat > "${SYSTEMD_DIR}/adaway-linux.timer" <<EOL
 [Unit]
-Description=Timer that runs adaway-linux.service ${freq}
+Description=Timer that runs adaway-linux.service "${freq}"
 Documentation=https://github.com/sedrubal/adaway-linux/
 After=network.target
 
 [Timer]
-OnCalendar=${freq}
+OnCalendar="${freq}"
 Persistent=true
 Unit=adaway-linux.service
 
