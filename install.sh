@@ -15,6 +15,7 @@ readonly SCRIPT_DIR="$(cd "$(dirname "${0}")" && pwd)"  # Gets the location of t
 readonly SRCLST="${SCRIPT_DIR}/hostssources.lst"
 readonly VERSION="4.0"
 readonly SYSTEMD_DIR="/etc/systemd/system"
+readonly CRONJOB_FILE="/etc/cron.d/adaway"
 #
 
 set -e
@@ -34,9 +35,9 @@ case "${1}" in
             [Yy][Ee][Ss] | [Yy] | "" ) # YES, Y, NULL
 
                 # check if cronjob was installed
-                if [[ $(sudo crontab -u root -l | grep 'adaway-linux.sh') ]] ; then
+                if [ -f "${CRONJOB_FILE}" ] ; then
                   echo "[i] Removing cronjob..."
-                  crontab -u root -l | grep -v 'adaway-linux.sh' |  crontab -u root - # Gets cronjob but ignores the line with adaway-linux.sh and then reinstalls cronjob
+                  rm "${CRONJOB_FILE}"
                 else
                   echo "[i] No cronjob installed. Skipping..."
                 fi
@@ -114,20 +115,51 @@ EOF
                 echo "[i] File created."
 
                 # add cronjob
-                read -r -p "[?] Create a cronjob/systemd-service which updates /etc/hosts with new adservers once a week? [systemd/cronjob/N] " REPLY
+                read -r -p "[?] Create a cronjob/systemd-service which updates /etc/hosts with new adservers? [systemd/cronjob/N] " REPLY
                 case "${REPLY}" in
                     [Cc][Rr][Oo][Nn][Jj][Oo][Bb] | [Cr][Rr][Oo][Nn][Tt][Aa][Bb] | [Cc][Rr][Oo][Nn] | [Cc] ) # CRONJOB, CRONTAB, CRON, C
+                        read -r -p "[?] How often should the cronjob run? [weekly/DAILY/hourly/reboot] " FREQUENCY
+                        # set daily as default
+                        freq="1 12 * * *"
+                        # check input
+                        case "${FREQUENCY}" in 
+                            [Ww][Ee][Ee][Kk][Ll][Yy] | [Ww] )
+                                freq="1 12 */5 * *"
+                                ;;
+                            [Hh][Oo][Uu][Rr][Ll][Yy] | [Hh] )
+                                freq="1 * * * *"
+                                ;;
+                            [Rr][Ee][Bb][Oo][Oo][Tt] | [Rr] )
+                                freq="@reboot"
+                                echo "[i] Keep in mind that you need a working internet connection on every startup for this option."
+                                echo "    This may be the case when you are on wire but often isn't the case when you are using wireless networks."
+                                ;;
+                        esac
                         echo "[i] Creating cronjob..."
-                        line="1 12 */5 * * ${SCRIPT_DIR}/adaway-linux.sh"
-                        (crontab -u root -l; echo "${line}" ) | crontab -u root -
+                        echo "${freq} root ${SCRIPT_DIR}/adaway-linux.sh" > "${CRONJOB_FILE}"
+                        # make sure permissions are right
+                        chmod u=rw,g=r,o=r "${CRONJOB_FILE}"
+                        chown root:root "${CRONJOB_FILE}"
                         ;;
                     [Ss][Yy][Ss][Tt][Ee][Mm][Dd] | [Ss][Yy][Ss] | [Ss] ) # SYSTEMD, SYS, S
+                        read -r -p "[?] How often should the service run? [weekly/DAILY/hourly] " FREQUENCY
+                        # set daily as default
+                        freq="daily"
+                        # check input
+                        case "${FREQUENCY}" in
+                            [Ww][Ee][Ee][Kk][Ll][Yy] | [Ww] )
+                                freq="weekly"
+                                ;;
+                            [Hh][Oo][Uu][Rr][Ll][Yy] | [Hh] )
+                                freq="hourly"
+                                ;;
+                        esac
                         echo "[i] Creating systemd service..."
 
                         # create .service file
                         cat > "${SYSTEMD_DIR}/adaway-linux.service" <<EOL
 [Unit]
-Description=Service to run adaway-linux weekly
+Description=Service to run adaway-linux ${freq}
 Documentation=https://github.com/sedrubal/adaway-linux/
 After=network.target
 
@@ -138,12 +170,12 @@ EOL
                         # create .timer file
                         cat > "${SYSTEMD_DIR}/adaway-linux.timer" <<EOL
 [Unit]
-Description=Timer that runs adaway-linux.service weekly
+Description=Timer that runs adaway-linux.service ${freq}
 Documentation=https://github.com/sedrubal/adaway-linux/
 After=network.target
 
 [Timer]
-OnCalendar=weekly
+OnCalendar=${freq}
 Persistent=true
 Unit=adaway-linux.service
 
