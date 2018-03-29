@@ -106,7 +106,7 @@ case "${1}" in
                 # create default hostsources.lst
                 echo "[i] Now I will create the default hostsources-file: ${SRCLST}."
                 echo "[i] You can add urls by editing this file manually."
-                echo "[i] A list of additional hostsources can be found in the AdAway-wiki at https://github.com/AdAway/AdAway/wiki."
+                echo "[i] A list of additional hostsources can be found in the AdAway wiki at https://github.com/AdAway/AdAway/wiki/HostsSources."
                 cat << EOF > "${SRCLST}"
 https://adaway.org/hosts.txt
 https://hosts-file.net/ad_servers.txt
