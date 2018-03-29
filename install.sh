@@ -106,6 +106,7 @@ case "${1}" in
                 # create default hostsources.lst
                 echo "[i] Now I will create the default hostsources-file: ${SRCLST}."
                 echo "[i] You can add urls by editing this file manually."
+                echo "[i] A list of additional hostsources can be found in the AdAway-wiki at https://github.com/AdAway/AdAway/wiki."
                 cat << EOF > "${SRCLST}"
 https://adaway.org/hosts.txt
 https://hosts-file.net/ad_servers.txt
@@ -189,6 +190,7 @@ EOL
                         ;;
                     * )
                         echo "[i] No schedule created." 1>&2
+                        echo "[i] Please run »adaway-linux.sh« to update your /etc/hosts." 1>&2
                         ;;
                 esac
 
