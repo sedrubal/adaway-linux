@@ -186,7 +186,7 @@ EOL
                         chmod u=rw,g=r,o=r "${SYSTEMD_DIR}/adaway-linux."*
 
                         # Enable the schedule
-                        systemctl --quiet enable adaway-linux.timer > /dev/null && systemctl start adaway-linux.timer && echo "[i] Systemd service succesfully initialized."
+                        systemctl --quiet enable adaway-linux.timer && systemctl start adaway-linux.timer && echo "[i] Systemd service succesfully initialized."
                         ;;
                     * )
                         echo "[i] No schedule created." 1>&2
