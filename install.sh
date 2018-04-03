@@ -186,15 +186,19 @@ EOL
                         chmod u=rw,g=r,o=r "${SYSTEMD_DIR}/adaway-linux."*
 
                         # Enable the schedule
-                        systemctl enable adaway-linux.timer && systemctl start adaway-linux.timer && echo "[i] Systemd service succesfully initialized."
+                        systemctl --quiet enable adaway-linux.timer > /dev/null && systemctl start adaway-linux.timer && echo "[i] Systemd service succesfully initialized."
                         ;;
                     * )
                         echo "[i] No schedule created." 1>&2
-                        echo "[i] Please run »adaway-linux.sh« to update your /etc/hosts." 1>&2
+                        echo "[i] Please run »adaway-linux.sh« to update your /etc/hosts manually." 1>&2
                         ;;
                 esac
 
                 echo "[i] Finished. For uninstall, please run »${0} -u«"
+                echo ""
+                echo "[i] Updating /etc/hosts now by running »adaway-linux.sh«."
+                ${SCRIPT_DIR}/adaway-linux.sh
+                echo "[i] /etc/hosts are up to date now."
                 exit 0
                 ;;
             * )
