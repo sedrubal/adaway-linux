@@ -2,6 +2,8 @@
 
 A small script to block ad-containing sites in your whole Linux system.
 
+**This project is deprecated. Use [Adsorber](https://github.com/stablestud/adsorber) instead. It is a hard fork of this project with more features, better code base and UX.**
+
 ## Features
 * install-script (also supports uninstall)
 * update hosts from hosts-servers (like https://adaway.org/hosts.txt)
